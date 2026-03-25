@@ -32,6 +32,10 @@ set(SOURCES
     src/network/decenzaclient.cpp
     src/core/notificationmanager.h
     src/core/notificationmanager.cpp
+    src/network/relayclient.h
+    src/network/relayclient.cpp
+    src/network/connectionmanager.h
+    src/network/connectionmanager.cpp
 )
 
 qt_add_executable(DecenzaPocket ${SOURCES})

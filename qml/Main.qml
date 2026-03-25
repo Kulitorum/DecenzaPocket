@@ -49,12 +49,12 @@ ApplicationWindow {
                 StatusCard {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 200
-                    machineState: Client.machineState
-                    machinePhase: Client.machinePhase
-                    temperature: Client.temperature
-                    waterLevelMl: Client.waterLevelMl
-                    isHeating: Client.isHeating
-                    isReady: Client.isReady
+                    machineState: Connection.machineState
+                    machinePhase: Connection.machinePhase
+                    temperature: Connection.temperature
+                    waterLevelMl: Connection.waterLevelMl
+                    isHeating: Connection.isHeating
+                    isReady: Connection.isReady
                 }
 
                 Item { Layout.fillHeight: true }
@@ -63,12 +63,12 @@ ApplicationWindow {
                 PowerButton {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 64
-                    isAwake: Client.isAwake
+                    isAwake: Connection.isAwake
                     onToggled: {
-                        if (Client.isAwake)
-                            Client.sleep()
+                        if (Connection.isAwake)
+                            Connection.sleep()
                         else
-                            Client.wake()
+                            Connection.wake()
                     }
                 }
 
@@ -76,7 +76,7 @@ ApplicationWindow {
 
                 // Connection indicator
                 ConnectionIndicator {
-                    mode: Client.connected ? "local" : "disconnected"
+                    mode: Connection.mode
                     Layout.alignment: Qt.AlignHCenter
                 }
 
@@ -98,10 +98,10 @@ ApplicationWindow {
                 }
             }
 
-            // Auto-connect on load
+            // Auto-connect on load via ConnectionManager
             Component.onCompleted: {
                 if (Settings.isPaired) {
-                    Client.connectToServer(Settings.pairedServerUrl)
+                    Connection.start()
                 }
             }
         }
@@ -109,7 +109,7 @@ ApplicationWindow {
 
     // Handle login required (session expired)
     Connections {
-        target: Client
+        target: Connection
         function onLoginRequired() {
             stackView.replace(pairingView)
         }
