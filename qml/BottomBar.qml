@@ -40,7 +40,7 @@ Rectangle {
 
             Image {
                 anchors.centerIn: parent
-                source: "qrc:/icons/back.svg"
+                source: "qrc:/resources/icons/back.svg"
                 width: 24; height: 24
                 sourceSize: Qt.size(24, 24)
             }

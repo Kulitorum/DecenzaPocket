@@ -85,7 +85,7 @@ ApplicationWindow {
             // Bottom bar with settings cog
             BottomBar {
                 title: "Decenza Pocket"
-                iconSource: "qrc:/icons/settings.svg"
+                iconSource: "qrc:/resources/icons/settings.svg"
                 onClicked: stackView.push(settingsView)
             }
 
