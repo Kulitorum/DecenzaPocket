@@ -242,6 +242,11 @@ Rectangle {
             root.errorMessage = error || "Invalid code. Check your authenticator app and try again."
         }
         function onPairingComplete(deviceId, deviceName) {
+            // Override the deviceName with the discovered name (more reliable)
+            if (root.foundDeviceName) {
+                Settings.setPairedDevice(deviceId, root.foundDeviceName,
+                    Settings.pairedServerUrl, Settings.pairingToken)
+            }
             root.pairingComplete()
         }
         function onConnectionError(error) {

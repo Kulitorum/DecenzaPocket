@@ -246,7 +246,10 @@ void DecenzaClient::pollStatus()
                 m_machinePhase = stateJson.value("phase").toString();
                 m_isHeating = stateJson.value("isHeating").toBool();
                 m_isReady = stateJson.value("isReady").toBool();
-                m_isAwake = stateJson.value("connected").toBool();
+                // isAwake = connected AND not sleeping
+                m_isAwake = stateJson.value("connected").toBool()
+                            && m_machineState != "Sleep"
+                            && m_machineState != "GoingToSleep";
 
                 // Now fetch telemetry
                 get(QStringLiteral("/api/telemetry"), [this](int telCode, const QJsonObject& telJson) {
@@ -275,7 +278,7 @@ void DecenzaClient::pollStatus()
             m_waterLevelMl = json.value("waterLevelMl").toDouble();
             m_isHeating = json.value("isHeating").toBool();
             m_isReady = json.value("isReady").toBool();
-            m_isAwake = json.value("awake").toBool();
+            m_isAwake = json.value("isAwake").toBool();
             if (json.contains("connected")) {
                 m_isAwake = json.value("connected").toBool() && m_isAwake;
             }

@@ -7,6 +7,7 @@ Rectangle {
     color: Theme.backgroundColor
 
     signal back()
+    signal unpaired()
 
     ColumnLayout {
         anchors.fill: parent
@@ -130,8 +131,9 @@ Rectangle {
             Layout.preferredHeight: 48
             visible: Settings.isPaired
             onClicked: {
+                Connection.disconnect()
                 Settings.clearPairedDevice()
-                root.back()
+                root.unpaired()
             }
             background: Rectangle {
                 color: Theme.surfaceColor

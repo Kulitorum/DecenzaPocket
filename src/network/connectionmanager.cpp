@@ -69,6 +69,13 @@ void ConnectionManager::sleep()
     }
 }
 
+void ConnectionManager::disconnect()
+{
+    m_localClient->disconnect();
+    m_remoteClient->disconnect();
+    setMode(QStringLiteral("disconnected"));
+}
+
 // ---------------------------------------------------------------------------
 // Local client slots
 // ---------------------------------------------------------------------------

@@ -109,6 +109,7 @@ ApplicationWindow {
         id: settingsView
         SettingsPage {
             onBack: stackView.pop()
+            onUnpaired: stackView.replace(pairingView)
         }
     }
 

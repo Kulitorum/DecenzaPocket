@@ -35,6 +35,7 @@ public:
     Q_INVOKABLE void start();
     Q_INVOKABLE void wake();
     Q_INVOKABLE void sleep();
+    Q_INVOKABLE void disconnect();
 
 signals:
     void modeChanged();
