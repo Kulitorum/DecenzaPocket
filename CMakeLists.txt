@@ -58,6 +58,7 @@ qt_add_qml_module(DecenzaPocket
         qml/PowerButton.qml
         qml/ConnectionIndicator.qml
         qml/PairingPage.qml
+        qml/SettingsPage.qml
 )
 
 target_include_directories(DecenzaPocket PRIVATE

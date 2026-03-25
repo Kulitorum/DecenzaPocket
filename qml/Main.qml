@@ -91,9 +91,7 @@ ApplicationWindow {
 
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: {
-                            // TODO: navigate to settings page (Task 14)
-                        }
+                        onClicked: stackView.push(settingsView)
                     }
                 }
             }
@@ -104,6 +102,13 @@ ApplicationWindow {
                     Connection.start()
                 }
             }
+        }
+    }
+
+    Component {
+        id: settingsView
+        SettingsPage {
+            onBack: stackView.pop()
         }
     }
 
