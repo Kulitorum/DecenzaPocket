@@ -26,6 +26,8 @@ set(SOURCES
     src/main.cpp
     src/core/settings.h
     src/core/settings.cpp
+    src/network/discovery.h
+    src/network/discovery.cpp
 )
 
 qt_add_executable(DecenzaPocket ${SOURCES})

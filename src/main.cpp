@@ -4,6 +4,7 @@
 #include <QQuickStyle>
 
 #include "core/settings.h"
+#include "network/discovery.h"
 
 int main(int argc, char *argv[])
 {
@@ -14,9 +15,11 @@ int main(int argc, char *argv[])
     QQuickStyle::setStyle("Material");
 
     Settings settings;
+    Discovery discovery;
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("Settings", &settings);
+    engine.rootContext()->setContextProperty("Discovery", &discovery);
     engine.loadFromModule("DecenzaPocket", "Main");
 
     if (engine.rootObjects().isEmpty())
