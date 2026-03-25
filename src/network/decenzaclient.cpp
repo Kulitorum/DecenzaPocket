@@ -120,10 +120,8 @@ void DecenzaClient::connectToServer(const QString& serverUrl)
         m_serverUrl.chop(1);
     }
 
-    m_connected = true;
-    emit connectedChanged();
-
-    // Probe the pocket/status endpoint first, fall back to power/status
+    // Probe the server to check if auth is needed.
+    // Don't set m_connected until we know the probe succeeded.
     get(QStringLiteral("/api/pocket/status"), [this](int statusCode, const QJsonObject& json) {
         if (statusCode == 401) {
             emit loginRequired();
@@ -138,8 +136,13 @@ void DecenzaClient::connectToServer(const QString& serverUrl)
                     return;
                 }
                 if (code >= 200 && code < 300) {
+                    m_connected = true;
+                    emit connectedChanged();
                     m_pollTimer.start();
                     emit pollingChanged();
+                    // No auth required - signal success so pairing can proceed
+                    emit loginSuccess();
+                    fetchTheme();
                 } else {
                     emit connectionError(QStringLiteral("Server returned status %1").arg(code));
                 }
@@ -148,8 +151,13 @@ void DecenzaClient::connectToServer(const QString& serverUrl)
         }
 
         if (statusCode >= 200 && statusCode < 300) {
+            m_connected = true;
+            emit connectedChanged();
             m_pollTimer.start();
             emit pollingChanged();
+            // No auth required - signal success so pairing can proceed
+            emit loginSuccess();
+            fetchTheme();
         } else {
             emit connectionError(QStringLiteral("Server returned status %1").arg(statusCode));
         }

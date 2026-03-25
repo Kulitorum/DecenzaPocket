@@ -248,14 +248,6 @@ Rectangle {
             root.connecting = false
             root.errorMessage = error
         }
-        function onConnectedChanged() {
-            // If connected without needing login, server has no security - pair directly
-            if (Client.connected && !root.needsLogin) {
-                root.connecting = false
-                var token = generateUUID()
-                Client.pair(token)
-            }
-        }
     }
 
     Component.onCompleted: {
