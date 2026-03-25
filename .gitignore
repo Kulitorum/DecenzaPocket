@@ -1,0 +1,36 @@
+# Build directories
+build/
+build-*/
+cmake-build-*/
+
+# Qt Creator generated files
+*.user
+*.user.*
+
+# Generated files
+android/AndroidManifest.xml
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Compiled files
+*.o
+*.obj
+*.moc
+*.rcc
+*.qmlc
+*.jsc
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
