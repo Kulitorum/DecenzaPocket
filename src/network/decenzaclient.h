@@ -78,5 +78,5 @@ private:
     bool m_isHeating = false;
     bool m_isReady = false;
     bool m_isAwake = false;
-    bool m_wasHeating = false; // For ready notification edge detection
+    QString m_previousPhase; // For ready notification edge detection
 };

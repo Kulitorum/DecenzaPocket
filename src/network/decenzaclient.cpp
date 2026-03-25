@@ -258,11 +258,11 @@ void DecenzaClient::pollStatus()
                         m_waterLevelMl = telJson.value("waterLevelMl").toDouble();
                     }
 
-                    // Ready notification edge detection
-                    if (m_wasHeating && m_isReady) {
+                    // Ready notification: fire when phase changes from Heating to Ready
+                    if (m_previousPhase == "Heating" && m_machinePhase == "Ready") {
                         emit readyNotification();
                     }
-                    m_wasHeating = m_isHeating;
+                    m_previousPhase = m_machinePhase;
 
                     emit statusUpdated();
                 });
