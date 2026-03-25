@@ -283,11 +283,11 @@ void DecenzaClient::pollStatus()
                 m_isAwake = json.value("connected").toBool() && m_isAwake;
             }
 
-            // Ready notification edge detection
-            if (m_wasHeating && m_isReady) {
+            // Ready notification: fire when phase changes from Heating to Ready
+            if (m_previousPhase == "Heating" && m_machinePhase == "Ready") {
                 emit readyNotification();
             }
-            m_wasHeating = m_isHeating;
+            m_previousPhase = m_machinePhase;
 
             emit statusUpdated();
         }
