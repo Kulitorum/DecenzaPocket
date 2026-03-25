@@ -53,19 +53,29 @@ void ConnectionManager::start()
 
 void ConnectionManager::wake()
 {
+    qDebug() << "ConnectionManager: wake() mode:" << m_mode
+             << "local:" << m_localClient->isConnected()
+             << "remote:" << m_remoteClient->isConnected();
     if (m_localClient->isConnected()) {
         m_localClient->wake();
     } else if (m_remoteClient->isConnected()) {
         m_remoteClient->sendCommand(QStringLiteral("wake"));
+    } else {
+        qWarning() << "ConnectionManager: wake() called but no connection available";
     }
 }
 
 void ConnectionManager::sleep()
 {
+    qDebug() << "ConnectionManager: sleep() mode:" << m_mode
+             << "local:" << m_localClient->isConnected()
+             << "remote:" << m_remoteClient->isConnected();
     if (m_localClient->isConnected()) {
         m_localClient->sleep();
     } else if (m_remoteClient->isConnected()) {
         m_remoteClient->sendCommand(QStringLiteral("sleep"));
+    } else {
+        qWarning() << "ConnectionManager: sleep() called but no connection available";
     }
 }
 
@@ -95,10 +105,12 @@ void ConnectionManager::onLocalStatusUpdated()
 
 void ConnectionManager::onLocalConnectedChanged()
 {
+    qDebug() << "ConnectionManager: local connected changed:"
+             << m_localClient->isConnected() << "current mode:" << m_mode;
     if (m_localClient->isConnected()) {
         setMode(QStringLiteral("local"));
     } else if (m_mode == QLatin1String("local")) {
-        // Local disconnected while we were in local mode -- try remote
+        qDebug() << "ConnectionManager: local connection lost, falling back to remote";
         tryRemoteFallback();
     }
 }
@@ -130,7 +142,11 @@ void ConnectionManager::onRemoteStatusReceived(const QString& state, const QStri
 
 void ConnectionManager::onRemoteConnectedChanged()
 {
-    if (!m_remoteClient->isConnected() && m_mode == QLatin1String("remote")) {
+    qDebug() << "ConnectionManager: remote connected changed:"
+             << m_remoteClient->isConnected() << "current mode:" << m_mode;
+    if (m_remoteClient->isConnected() && m_mode != QLatin1String("local")) {
+        setMode(QStringLiteral("remote"));
+    } else if (!m_remoteClient->isConnected() && m_mode == QLatin1String("remote")) {
         setMode(QStringLiteral("disconnected"));
     }
 }

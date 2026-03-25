@@ -16,6 +16,14 @@ RelayClient::RelayClient(Settings* settings, QObject* parent)
             this, &RelayClient::onDisconnected);
     connect(&m_socket, &QWebSocket::textMessageReceived,
             this, &RelayClient::onTextMessageReceived);
+    connect(&m_socket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::errorOccurred),
+            this, [](QAbstractSocket::SocketError error) {
+        qWarning() << "RelayClient: socket error:" << error;
+    });
+    connect(&m_socket, &QWebSocket::sslErrors, this, [](const QList<QSslError>& errors) {
+        for (const auto& e : errors)
+            qWarning() << "RelayClient: SSL error:" << e.errorString();
+    });
 
     m_reconnectTimer.setSingleShot(true);
     connect(&m_reconnectTimer, &QTimer::timeout,
@@ -38,10 +46,13 @@ void RelayClient::connectToRelay()
         return; // Not paired
     }
 
+    QString pairingToken = m_settings->pairingToken();
     QString url = QStringLiteral("wss://ws.decenza.coffee/prod?device_id=%1&role=controller")
                       .arg(deviceId);
 
-    qDebug() << "RelayClient: connecting to" << url;
+    qDebug() << "RelayClient: connecting to" << url
+             << "deviceId:" << deviceId
+             << "hasToken:" << !pairingToken.isEmpty();
     m_socket.open(QUrl(url));
 }
 
@@ -55,6 +66,9 @@ void RelayClient::disconnect()
 
 void RelayClient::sendCommand(const QString& command)
 {
+    qDebug() << "RelayClient: sending command:" << command
+             << "connected:" << isConnected();
+
     QJsonObject msg;
     msg["action"] = QStringLiteral("command");
     msg["device_id"] = m_settings->pairedDeviceId();
@@ -62,6 +76,7 @@ void RelayClient::sendCommand(const QString& command)
     msg["command"] = command;
 
     QString payload = QString::fromUtf8(QJsonDocument(msg).toJson(QJsonDocument::Compact));
+    qDebug() << "RelayClient: >> " << payload;
     m_socket.sendTextMessage(payload);
 }
 
@@ -114,6 +129,7 @@ void RelayClient::onTextMessageReceived(const QString& message)
 
     QJsonObject json = doc.object();
     QString type = json.value("type").toString();
+    qDebug() << "RelayClient: << type:" << type;
 
     if (type == QLatin1String("relay_status")) {
         QString state = json.value("state").toString();

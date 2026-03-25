@@ -1,0 +1,132 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.10.1'
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+}
+
+apply plugin: qtGradlePluginType
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+}
+
+android {
+    namespace = androidPackageName
+    compileSdkVersion 35
+    buildToolsVersion androidBuildToolsVersion
+    ndkVersion = androidNdkVersion
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = [qtAndroidDir + '/src', 'src', 'java']
+            aidl.srcDirs = [qtAndroidDir + '/src', 'src', 'aidl']
+            res.srcDirs = [qtAndroidDir + '/res', 'res']
+            resources.srcDirs = ['resources']
+            renderscript.srcDirs = ['src']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
+       }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.incremental = true
+        options.compilerArgs += ['-Xlint:all']
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    lintOptions {
+        abortOnError = false
+    }
+
+    aaptOptions {
+        noCompress 'rcc'
+    }
+
+    defaultConfig {
+        resConfig "en"
+        minSdkVersion qtMinSdkVersion
+        targetSdkVersion qtTargetSdkVersion
+        ndk.abiFilters = qtTargetAbiList.split(",")
+    }
+
+}
+
+// Copy APK/AAB with versioned filename after build completes
+gradle.buildFinished { result ->
+    if (result.failure) return
+
+    // Read versionName from AndroidManifest.xml
+    def manifestFile = file("${projectDir}/AndroidManifest.xml")
+    def versionName = "0.1.0"
+    if (manifestFile.exists()) {
+        def match = manifestFile.text =~ /android:versionName="([^"]+)"/
+        if (match.find()) {
+            versionName = match.group(1)
+        }
+    }
+
+    // Sign and copy APK with versioned filename
+    def apkDir = file("${buildDir}/outputs/apk/release")
+    if (apkDir.exists()) {
+        def keystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+        def keyAlias = "de1-key"
+        def storePass = System.getenv("QT_ANDROID_KEYSTORE_STORE_PASS")
+
+        if (!keystorePath || !storePass) {
+            println "Skipping APK signing: keystore env vars not set"
+            return
+        }
+
+        // Find apksigner in Android SDK
+        def androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+        def buildToolsDir = file("${androidHome}/build-tools")
+        def apksigner = null
+        if (buildToolsDir.exists()) {
+            def versions = buildToolsDir.listFiles()?.sort { it.name }?.reverse()
+            if (versions) {
+                def apksignerName = System.getProperty("os.name").toLowerCase().contains("windows") ? "apksigner.bat" : "apksigner"
+                apksigner = new File(versions[0], apksignerName)
+            }
+        }
+
+        apkDir.listFiles()?.each { f ->
+            if (f.name.endsWith('-release-unsigned.apk')) {
+                def dest = new File(apkDir, "DecenzaPocket_${versionName}.apk")
+                if (!dest.exists() || f.lastModified() > dest.lastModified()) {
+                    if (apksigner?.exists()) {
+                        def signCmd = [apksigner.absolutePath, "sign",
+                                      "--ks", keystorePath,
+                                      "--ks-key-alias", keyAlias,
+                                      "--ks-pass", "pass:${storePass}",
+                                      "--out", dest.absolutePath,
+                                      f.absolutePath]
+                        def proc = signCmd.execute()
+                        proc.waitFor()
+                        if (proc.exitValue() == 0) {
+                            println "\n==========================================\nVERSIONED APK (signed): ${dest.absolutePath}\n==========================================\n"
+                        } else {
+                            println "APK signing failed: ${proc.err.text}"
+                        }
+                    } else {
+                        println "WARNING: apksigner not found, cannot create versioned APK"
+                    }
+                }
+            }
+        }
+    }
+}
