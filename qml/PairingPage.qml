@@ -10,6 +10,8 @@ Rectangle {
 
     property bool isSearching: false
     property bool deviceFound: false
+    property bool needsLogin: false   // true if server has security enabled
+    property bool connecting: false
     property string foundDeviceName: ""
     property string foundServerUrl: ""
     property string errorMessage: ""
@@ -65,7 +67,7 @@ Rectangle {
             }
         }
 
-        // Found - enter TOTP
+        // Found - connecting or needs login
         ColumnLayout {
             visible: root.deviceFound
             spacing: Theme.spacingMedium
@@ -78,57 +80,92 @@ Rectangle {
                 Layout.alignment: Qt.AlignHCenter
             }
 
-            Text {
-                text: "Enter the TOTP code from your Decenza settings"
-                color: Theme.textSecondaryColor
-                font.pixelSize: Theme.bodySize
-                wrapMode: Text.WordWrap
-                horizontalAlignment: Text.AlignHCenter
-                Layout.fillWidth: true
+            // Connecting spinner (shown while probing server)
+            ColumnLayout {
+                visible: root.connecting && !root.needsLogin
+                Layout.alignment: Qt.AlignHCenter
+                spacing: Theme.spacingSmall
+
+                BusyIndicator {
+                    Layout.alignment: Qt.AlignHCenter
+                    running: root.connecting
+                    palette.dark: Theme.primaryColor
+                }
+                Text {
+                    text: "Connecting..."
+                    color: Theme.textSecondaryColor
+                    font.pixelSize: Theme.bodySize
+                    Layout.alignment: Qt.AlignHCenter
+                }
             }
 
-            TextField {
-                id: totpField
-                placeholderText: "TOTP Code"
-                horizontalAlignment: Text.AlignHCenter
-                font.pixelSize: Theme.titleSize
-                inputMethodHints: Qt.ImhDigitsOnly
-                maximumLength: 6
-                Layout.fillWidth: true
-                Layout.preferredHeight: 56
-                color: Theme.textColor
-                placeholderTextColor: Theme.textSecondaryColor
-                background: Rectangle {
-                    color: Theme.surfaceColor
-                    radius: Theme.cardRadius / 2
-                    border.color: totpField.activeFocus ? Theme.primaryColor : Theme.borderColor
-                    border.width: 1
-                }
-                onAccepted: loginButton.clicked()
-            }
+            // TOTP login form (shown only when server requires auth)
+            ColumnLayout {
+                visible: root.needsLogin
+                spacing: Theme.spacingMedium
 
-            Button {
-                id: loginButton
-                text: "Connect"
-                Layout.fillWidth: true
-                Layout.preferredHeight: 48
-                enabled: totpField.text.length >= 6
-                onClicked: {
-                    root.errorMessage = ""
-                    Client.connectToServer(root.foundServerUrl)
-                    Client.login(totpField.text)
-                }
-                background: Rectangle {
-                    color: loginButton.enabled ? Theme.primaryColor : Theme.surfaceColor
-                    radius: Theme.cardRadius / 2
-                }
-                contentItem: Text {
-                    text: loginButton.text
-                    color: loginButton.enabled ? Theme.primaryContrastColor : Theme.textSecondaryColor
+                Text {
+                    text: "Enter your 6-digit authenticator code"
+                    color: Theme.textColor
                     font.pixelSize: Theme.bodySize
                     font.bold: true
+                    wrapMode: Text.WordWrap
                     horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
+                    Layout.fillWidth: true
+                }
+
+                Text {
+                    text: "On your Decenza tablet, go to:\nSettings → Data → Web Security\n\nOpen your authenticator app (Google Authenticator, Authy, etc.) and enter the 6-digit code shown for Decenza."
+                    color: Theme.textSecondaryColor
+                    font.pixelSize: Theme.labelSize
+                    wrapMode: Text.WordWrap
+                    horizontalAlignment: Text.AlignHCenter
+                    lineHeight: 1.3
+                    Layout.fillWidth: true
+                }
+
+                TextField {
+                    id: totpField
+                    placeholderText: "000000"
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize: Theme.titleSize
+                    inputMethodHints: Qt.ImhDigitsOnly
+                    maximumLength: 6
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 56
+                    color: Theme.textColor
+                    placeholderTextColor: Theme.textSecondaryColor
+                    background: Rectangle {
+                        color: Theme.surfaceColor
+                        radius: Theme.cardRadius / 2
+                        border.color: totpField.activeFocus ? Theme.primaryColor : Theme.borderColor
+                        border.width: 1
+                    }
+                    onAccepted: if (totpField.text.length >= 6) loginButton.clicked()
+                }
+
+                Button {
+                    id: loginButton
+                    text: "Connect"
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 48
+                    enabled: totpField.text.length >= 6
+                    onClicked: {
+                        root.errorMessage = ""
+                        Client.login(totpField.text)
+                    }
+                    background: Rectangle {
+                        color: loginButton.enabled ? Theme.primaryColor : Theme.surfaceColor
+                        radius: Theme.cardRadius / 2
+                    }
+                    contentItem: Text {
+                        text: loginButton.text
+                        color: loginButton.enabled ? Theme.primaryContrastColor : Theme.textSecondaryColor
+                        font.pixelSize: Theme.bodySize
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
                 }
             }
         }
@@ -178,28 +215,46 @@ Rectangle {
             root.deviceFound = true
             root.foundDeviceName = deviceName
             root.foundServerUrl = serverUrl
+            // Auto-connect to probe if security is enabled
+            root.connecting = true
+            Client.connectToServer(serverUrl)
         }
         function onSearchFailed() {
-            root.errorMessage = "No Decenza tablet found on this network"
+            root.errorMessage = "No Decenza tablet found on this network.\nMake sure your phone is on the same WiFi as the tablet."
         }
     }
 
     // Client connections
     Connections {
         target: Client
+        function onLoginRequired() {
+            // Server has security enabled - show TOTP form
+            root.connecting = false
+            root.needsLogin = true
+        }
         function onLoginSuccess() {
             // Generate a pairing token and send to tablet
+            root.connecting = false
             var token = generateUUID()
             Client.pair(token)
         }
         function onLoginFailed(error) {
-            root.errorMessage = error || "Login failed"
+            root.errorMessage = error || "Invalid code. Check your authenticator app and try again."
         }
         function onPairingComplete(deviceId, deviceName) {
             root.pairingComplete()
         }
         function onConnectionError(error) {
+            root.connecting = false
             root.errorMessage = error
+        }
+        function onConnectedChanged() {
+            // If connected without needing login, server has no security - pair directly
+            if (Client.connected && !root.needsLogin) {
+                root.connecting = false
+                var token = generateUUID()
+                Client.pair(token)
+            }
         }
     }
 
