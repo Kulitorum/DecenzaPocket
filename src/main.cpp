@@ -33,6 +33,10 @@ int main(int argc, char *argv[])
     QObject::connect(&connection, &ConnectionManager::readyNotification,
                      &notifications, &NotificationManager::playReadySound);
 
+    // Save theme data when fetched from the local server
+    QObject::connect(&localClient, &DecenzaClient::themeReceived,
+                     &settings, &Settings::setThemeData);
+
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("Settings", &settings);
     engine.rootContext()->setContextProperty("Discovery", &discovery);

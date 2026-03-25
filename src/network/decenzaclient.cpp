@@ -185,6 +185,9 @@ void DecenzaClient::login(const QString& totpCode)
             }
             emit loginSuccess();
 
+            // Automatically fetch the theme after successful login
+            fetchTheme();
+
             // Start polling now that we are authenticated
             if (!m_pollTimer.isActive()) {
                 m_pollTimer.start();
