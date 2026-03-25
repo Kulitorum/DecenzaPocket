@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <array name="bundled_libs">
-        <item>arm64-v8a;DecenzaPocket_arm64-v8a</item>
-    </array>
-</resources>

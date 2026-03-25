@@ -94,6 +94,7 @@ if(ANDROID)
         "${CMAKE_SOURCE_DIR}/android/AndroidManifest.xml"
         @ONLY
     )
+
 endif()
 
 if(IOS)
