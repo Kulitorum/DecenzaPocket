@@ -4,6 +4,7 @@
 #include <QQuickStyle>
 
 #include "core/settings.h"
+#include "core/notificationmanager.h"
 #include "network/discovery.h"
 #include "network/decenzaclient.h"
 
@@ -18,11 +19,16 @@ int main(int argc, char *argv[])
     Settings settings;
     Discovery discovery;
     DecenzaClient client(&settings);
+    NotificationManager notifications;
+
+    QObject::connect(&client, &DecenzaClient::readyNotification,
+                     &notifications, &NotificationManager::playReadySound);
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("Settings", &settings);
     engine.rootContext()->setContextProperty("Discovery", &discovery);
     engine.rootContext()->setContextProperty("Client", &client);
+    engine.rootContext()->setContextProperty("Notifications", &notifications);
     engine.loadFromModule("DecenzaPocket", "Main");
 
     if (engine.rootObjects().isEmpty())

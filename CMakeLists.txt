@@ -30,9 +30,17 @@ set(SOURCES
     src/network/discovery.cpp
     src/network/decenzaclient.h
     src/network/decenzaclient.cpp
+    src/core/notificationmanager.h
+    src/core/notificationmanager.cpp
 )
 
 qt_add_executable(DecenzaPocket ${SOURCES})
+
+qt_add_resources(DecenzaPocket "sounds"
+    PREFIX "/"
+    FILES
+        resources/sounds/ready.wav
+)
 
 set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
