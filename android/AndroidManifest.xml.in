@@ -29,6 +29,7 @@
             android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|layoutDirection|locale|fontScale|keyboard|keyboardHidden|navigation|mcc|mnc|density"
             android:screenOrientation="portrait"
             android:exported="true">
+            <meta-data android:name="android.app.lib_name" android:value="DecenzaPocket" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
