@@ -14,14 +14,18 @@ Rectangle {
     property bool isReady: false
 
     function stateColor() {
-        if (machineState === "Sleep" || machineState === "Disconnected" || machineState === "Unknown")
+        var display = displayState()
+        if (display === "Sleep" || display === "Disconnected" || display === "Unknown")
             return Theme.textSecondaryColor
-        if (isHeating) return Theme.warningColor
-        if (isReady) return Theme.successColor
+        if (display === "Heating")
+            return Theme.warningColor
+        if (display === "Ready" || display === "Idle")
+            return Theme.successColor
         return Theme.primaryColor
     }
 
     function displayState() {
+        // Prefer phase (Heating, Ready, etc.) over raw BLE state
         if (machinePhase && machinePhase !== "Disconnected")
             return machinePhase
         return machineState || "Disconnected"
