@@ -83,7 +83,7 @@ set_target_properties(DecenzaPocket PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
     QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/android"
-    OUTPUT_NAME "DecenzaPocket"
+    QT_ANDROID_APP_LIB_NAME "DecenzaPocket"
 )
 
 if(ANDROID)
