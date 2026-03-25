@@ -1,6 +1,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QQuickStyle>
+
+#include "core/settings.h"
 
 int main(int argc, char *argv[])
 {
@@ -10,7 +13,10 @@ int main(int argc, char *argv[])
 
     QQuickStyle::setStyle("Material");
 
+    Settings settings;
+
     QQmlApplicationEngine engine;
+    engine.rootContext()->setContextProperty("Settings", &settings);
     engine.loadFromModule("DecenzaPocket", "Main");
 
     if (engine.rootObjects().isEmpty())

@@ -24,6 +24,8 @@ qt_standard_project_setup(REQUIRES 6.8)
 
 set(SOURCES
     src/main.cpp
+    src/core/settings.h
+    src/core/settings.cpp
 )
 
 qt_add_executable(DecenzaPocket ${SOURCES})
