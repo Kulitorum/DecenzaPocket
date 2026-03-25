@@ -34,11 +34,14 @@ set(SOURCES
 
 qt_add_executable(DecenzaPocket ${SOURCES})
 
+set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+
 qt_add_qml_module(DecenzaPocket
     URI DecenzaPocket
     VERSION 1.0
     QML_FILES
         qml/Main.qml
+        qml/Theme.qml
 )
 
 target_include_directories(DecenzaPocket PRIVATE
