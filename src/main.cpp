@@ -2,6 +2,8 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
+#include <QSslSocket>
+#include <QDebug>
 
 #include "core/settings.h"
 #include "core/notificationmanager.h"
@@ -12,9 +14,17 @@
 
 int main(int argc, char *argv[])
 {
+    // Tell Qt's OpenSSL backend to look for libssl_3.so / libcrypto_3.so
+    qputenv("QT_OPENSSL_SUFFIX", "_3");
+
     QGuiApplication app(argc, argv);
     app.setOrganizationName("Decenza");
     app.setApplicationName("DecenzaPocket");
+
+    // Log SSL status (also triggers library loading on Android)
+    qDebug() << "SSL supported:" << QSslSocket::supportsSsl()
+             << "build:" << QSslSocket::sslLibraryBuildVersionString()
+             << "runtime:" << QSslSocket::sslLibraryVersionString();
 
     QQuickStyle::setStyle("Material");
 
