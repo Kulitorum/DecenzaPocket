@@ -5,6 +5,7 @@
 
 #include "core/settings.h"
 #include "network/discovery.h"
+#include "network/decenzaclient.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,10 +17,12 @@ int main(int argc, char *argv[])
 
     Settings settings;
     Discovery discovery;
+    DecenzaClient client(&settings);
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty("Settings", &settings);
     engine.rootContext()->setContextProperty("Discovery", &discovery);
+    engine.rootContext()->setContextProperty("Client", &client);
     engine.loadFromModule("DecenzaPocket", "Main");
 
     if (engine.rootObjects().isEmpty())

@@ -28,6 +28,8 @@ set(SOURCES
     src/core/settings.cpp
     src/network/discovery.h
     src/network/discovery.cpp
+    src/network/decenzaclient.h
+    src/network/decenzaclient.cpp
 )
 
 qt_add_executable(DecenzaPocket ${SOURCES})
