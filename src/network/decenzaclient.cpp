@@ -142,7 +142,7 @@ void DecenzaClient::connectToServer(const QString& serverUrl)
                     emit pollingChanged();
                     // No auth required - signal success so pairing can proceed
                     emit loginSuccess();
-                    fetchTheme();
+                    if (m_settings->themeAutoSync()) fetchTheme();
                 } else {
                     emit connectionError(QStringLiteral("Server returned status %1").arg(code));
                 }
@@ -194,7 +194,7 @@ void DecenzaClient::login(const QString& totpCode)
             emit loginSuccess();
 
             // Automatically fetch the theme after successful login
-            fetchTheme();
+            if (m_settings->themeAutoSync()) fetchTheme();
 
             // Start polling now that we are authenticated
             if (!m_pollTimer.isActive()) {

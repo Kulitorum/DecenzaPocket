@@ -14,6 +14,7 @@ class Settings : public QObject {
     Q_PROPERTY(bool isPaired READ isPaired NOTIFY pairedDeviceChanged)
     Q_PROPERTY(QVariantMap themeColors READ themeColors NOTIFY themeChanged)
     Q_PROPERTY(QVariantMap themeFonts READ themeFonts NOTIFY themeChanged)
+    Q_PROPERTY(bool themeAutoSync READ themeAutoSync WRITE setThemeAutoSync NOTIFY themeAutoSyncChanged)
 
 public:
     explicit Settings(QObject* parent = nullptr);
@@ -32,12 +33,16 @@ public:
     QVariantMap themeFonts() const;
     void setThemeData(const QVariantMap& colors, const QVariantMap& fonts);
 
+    bool themeAutoSync() const;
+    void setThemeAutoSync(bool enabled);
+
     QString sessionCookie() const;
     void setSessionCookie(const QString& cookie);
 
 signals:
     void pairedDeviceChanged();
     void themeChanged();
+    void themeAutoSyncChanged();
 
 private:
     QSettings m_settings;

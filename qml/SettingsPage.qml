@@ -77,6 +77,71 @@ Rectangle {
             }
         }
 
+        // Theme sync
+        Rectangle {
+            Layout.fillWidth: true
+            height: themeColumn.implicitHeight + Theme.spacingLarge * 2
+            color: Theme.surfaceColor
+            radius: Theme.cardRadius
+
+            ColumnLayout {
+                id: themeColumn
+                anchors.fill: parent
+                anchors.margins: Theme.spacingLarge
+                spacing: Theme.spacingSmall
+
+                Text {
+                    text: "Theme"
+                    color: Theme.textSecondaryColor
+                    font.pixelSize: Theme.labelSize
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Text {
+                        text: "Sync with Decenza automatically"
+                        color: Theme.textColor
+                        font.pixelSize: Theme.bodySize
+                        Layout.fillWidth: true
+                    }
+                    Switch {
+                        checked: Settings.themeAutoSync
+                        onToggled: Settings.themeAutoSync = checked
+                    }
+                }
+
+                Button {
+                    text: syncTimer.running ? "Syncing..." : "Sync theme now"
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 40
+                    enabled: Connection.mode !== "disconnected" && !syncTimer.running
+                    onClicked: {
+                        Client.fetchTheme()
+                        syncTimer.start()
+                    }
+                    background: Rectangle {
+                        color: parent.enabled ? Theme.primaryColor : Theme.surfaceColor
+                        radius: Theme.cardRadius / 2
+                        border.color: parent.enabled ? "transparent" : Theme.borderColor
+                        border.width: parent.enabled ? 0 : 1
+                    }
+                    contentItem: Text {
+                        text: parent.text
+                        color: parent.enabled ? Theme.primaryContrastColor : Theme.textSecondaryColor
+                        font.pixelSize: Theme.bodySize
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    Timer {
+                        id: syncTimer
+                        interval: 1500
+                        onTriggered: running = false
+                    }
+                }
+            }
+        }
+
         // Connection mode
         Rectangle {
             Layout.fillWidth: true

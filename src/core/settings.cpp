@@ -38,6 +38,15 @@ void Settings::setThemeData(const QVariantMap& colors, const QVariantMap& fonts)
     emit themeChanged();
 }
 
+bool Settings::themeAutoSync() const { return m_settings.value("theme/autoSync", true).toBool(); }
+void Settings::setThemeAutoSync(bool enabled)
+{
+    if (themeAutoSync() != enabled) {
+        m_settings.setValue("theme/autoSync", enabled);
+        emit themeAutoSyncChanged();
+    }
+}
+
 QString Settings::sessionCookie() const { return m_settings.value("device/sessionCookie").toString(); }
 void Settings::setSessionCookie(const QString& cookie)
 {
