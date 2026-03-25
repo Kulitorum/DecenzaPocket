@@ -63,6 +63,7 @@ private:
     void get(const QString& path, std::function<void(int statusCode, const QJsonObject&)> callback);
     void post(const QString& path, const QByteArray& body,
               std::function<void(int statusCode, const QJsonObject&)> callback);
+    void applyPhaseOverride();
 
     Settings* m_settings;
     QNetworkAccessManager* m_nam;
@@ -74,6 +75,7 @@ private:
     QString m_machineState;
     QString m_machinePhase;
     double m_temperature = 0;
+    double m_goalTemperature = 0;
     double m_waterLevelMl = 0;
     bool m_isHeating = false;
     bool m_isReady = false;

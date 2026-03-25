@@ -258,6 +258,8 @@ void DecenzaClient::pollStatus()
                         m_waterLevelMl = telJson.value("waterLevelMl").toDouble();
                     }
 
+                    applyPhaseOverride();
+
                     // Ready notification: fire when phase changes from Heating to Ready
                     if (m_previousPhase == "Heating" && m_machinePhase == "Ready") {
                         emit readyNotification();
@@ -275,6 +277,7 @@ void DecenzaClient::pollStatus()
             m_machineState = json.value("state").toString();
             m_machinePhase = json.value("phase").toString();
             m_temperature = json.value("temperature").toDouble();
+            m_goalTemperature = json.value("goalTemperature").toDouble();
             m_waterLevelMl = json.value("waterLevelMl").toDouble();
             m_isHeating = json.value("isHeating").toBool();
             m_isReady = json.value("isReady").toBool();
@@ -282,6 +285,8 @@ void DecenzaClient::pollStatus()
             if (json.contains("connected")) {
                 m_isAwake = json.value("connected").toBool() && m_isAwake;
             }
+
+            applyPhaseOverride();
 
             // Ready notification: fire when phase changes from Heating to Ready
             if (m_previousPhase == "Heating" && m_machinePhase == "Ready") {
@@ -292,6 +297,17 @@ void DecenzaClient::pollStatus()
             emit statusUpdated();
         }
     });
+}
+
+void DecenzaClient::applyPhaseOverride()
+{
+    // The DE1 reports "Ready" before actually reaching target temperature.
+    // Override: if goal is known and temp is more than 0.5°C below goal, show Heating.
+    if (m_goalTemperature > 0 && m_temperature > 0 &&
+        (m_machinePhase == "Ready" || m_machinePhase == "Idle") &&
+        m_temperature < m_goalTemperature - 0.5) {
+        m_machinePhase = QStringLiteral("Heating");
+    }
 }
 
 // ---------------------------------------------------------------------------
