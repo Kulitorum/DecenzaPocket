@@ -37,7 +37,7 @@ ApplicationWindow {
 
                 // Header
                 Text {
-                    text: Settings.pairedDeviceName || "Decenza"
+                    text: "Decenza Pocket"
                     color: Theme.textColor
                     font.pixelSize: Theme.headingSize
                     font.bold: true

@@ -17,8 +17,8 @@ RowLayout {
 
     Text {
         text: {
-            if (mode === "local") return "Local connection"
-            if (mode === "remote") return "Remote connection"
+            if (mode === "local") return "Connected over WiFi"
+            if (mode === "remote") return "Connected over internet"
             return "Disconnected"
         }
         color: Theme.textSecondaryColor
