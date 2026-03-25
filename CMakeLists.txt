@@ -48,6 +48,7 @@ qt_add_resources(DecenzaPocket "sounds"
 
 qt_add_resources(DecenzaPocket "icons"
     PREFIX "/"
+    BASE_DIR resources
     FILES
         resources/icons/back.svg
         resources/icons/settings.svg
