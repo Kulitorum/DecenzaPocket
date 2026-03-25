@@ -47,7 +47,7 @@ void RelayClient::connectToRelay()
     }
 
     QString pairingToken = m_settings->pairingToken();
-    QString url = QStringLiteral("wss://ws.decenza.coffee/prod?device_id=%1&role=controller")
+    QString url = QStringLiteral("wss://ws.decenza.coffee?device_id=%1&role=controller")
                       .arg(deviceId);
 
     qDebug() << "RelayClient: connecting to" << url
