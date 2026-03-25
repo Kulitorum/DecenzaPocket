@@ -4,7 +4,7 @@
 NotificationManager::NotificationManager(QObject* parent)
     : QObject(parent)
 {
-    m_sound.setSource(QUrl(QStringLiteral("qrc:/resources/sounds/ready.wav")));
+    m_sound.setSource(QUrl(QStringLiteral("qrc:/resources/sounds/speech.wav")));
     m_sound.setVolume(1.0);
 }
 

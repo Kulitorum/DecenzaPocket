@@ -43,7 +43,7 @@ qt_add_executable(DecenzaPocket ${SOURCES})
 qt_add_resources(DecenzaPocket "sounds"
     PREFIX "/"
     FILES
-        resources/sounds/ready.wav
+        resources/sounds/speech.wav
 )
 
 qt_add_resources(DecenzaPocket "icons"
