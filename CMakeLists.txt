@@ -86,6 +86,17 @@ set_target_properties(DecenzaPocket PROPERTIES
 )
 
 if(ANDROID)
+    # OpenSSL for TLS (required for wss:// WebSocket relay)
+    include(FetchContent)
+    FetchContent_Declare(
+        android_openssl
+        DOWNLOAD_EXTRACT_TIMESTAMP true
+        URL https://github.com/KDAB/android_openssl/archive/refs/heads/master.zip
+    )
+    FetchContent_MakeAvailable(android_openssl)
+    include(${android_openssl_SOURCE_DIR}/android_openssl.cmake)
+    add_android_openssl_libraries(DecenzaPocket)
+
     set(ANDROID_VERSION_NAME "${CMAKE_PROJECT_VERSION}")
     set(ANDROID_VERSION_CODE "${CURRENT_VERSION_CODE}")
     configure_file(
