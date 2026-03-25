@@ -43,7 +43,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("Client", &localClient);
     engine.rootContext()->setContextProperty("Connection", &connection);
     engine.rootContext()->setContextProperty("Notifications", &notifications);
-    engine.loadFromModule("DecenzaPocket", "Main");
+    engine.addImportPath(QStringLiteral("qrc:/qml"));
+    engine.load(QUrl(QStringLiteral("qrc:/qml/Main.qml")));
 
     if (engine.rootObjects().isEmpty())
         return -1;

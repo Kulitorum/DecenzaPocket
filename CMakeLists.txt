@@ -40,6 +40,7 @@ set(SOURCES
 
 qt_add_executable(DecenzaPocket ${SOURCES})
 
+# Resources
 qt_add_resources(DecenzaPocket "sounds"
     PREFIX "/"
     FILES
@@ -53,12 +54,11 @@ qt_add_resources(DecenzaPocket "icons"
         resources/icons/settings.svg
 )
 
-set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
-
-qt_add_qml_module(DecenzaPocket
-    URI DecenzaPocket
-    VERSION 1.0
-    QML_FILES
+qt_add_resources(DecenzaPocket "qml"
+    PREFIX "/qml"
+    BASE "qml"
+    FILES
+        qml/qmldir
         qml/Main.qml
         qml/Theme.qml
         qml/StatusCard.qml
@@ -83,7 +83,6 @@ set_target_properties(DecenzaPocket PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
     QT_ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/android"
-    QT_ANDROID_APP_LIB_NAME "DecenzaPocket"
 )
 
 if(ANDROID)
@@ -94,7 +93,6 @@ if(ANDROID)
         "${CMAKE_SOURCE_DIR}/android/AndroidManifest.xml"
         @ONLY
     )
-
 endif()
 
 if(IOS)
