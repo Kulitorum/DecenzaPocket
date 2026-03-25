@@ -41,6 +41,7 @@ public:
     Q_INVOKABLE void wake();
     Q_INVOKABLE void sleep();
     Q_INVOKABLE void fetchTheme();
+    Q_INVOKABLE void pair(const QString& pairingToken);
 
 signals:
     void connectedChanged();
@@ -50,6 +51,7 @@ signals:
     void loginSuccess();
     void loginFailed(const QString& error);
     void themeReceived(const QVariantMap& colors, const QVariantMap& fonts);
+    void pairingComplete(const QString& deviceId, const QString& deviceName);
     void commandSent(const QString& command, bool success);
     void connectionError(const QString& error);
     void readyNotification();

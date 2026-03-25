@@ -304,6 +304,30 @@ void DecenzaClient::sleep()
 }
 
 // ---------------------------------------------------------------------------
+// Pairing
+// ---------------------------------------------------------------------------
+
+void DecenzaClient::pair(const QString& pairingToken)
+{
+    QJsonObject body;
+    body["pairingToken"] = pairingToken;
+    QByteArray payload = QJsonDocument(body).toJson(QJsonDocument::Compact);
+
+    post(QStringLiteral("/api/pocket/pair"), payload, [this, pairingToken](int statusCode, const QJsonObject& json) {
+        if (statusCode == 200 && json.value("success").toBool()) {
+            QString deviceId = json.value("deviceId").toString();
+            QString deviceName = json.value("deviceName").toString();
+            m_settings->setPairedDevice(deviceId, deviceName, m_serverUrl, pairingToken);
+            emit pairingComplete(deviceId, deviceName);
+            qDebug() << "DecenzaClient: Pairing complete, deviceId:" << deviceId;
+        } else {
+            QString error = json.value("error").toString("Pairing failed");
+            emit connectionError(error);
+        }
+    });
+}
+
+// ---------------------------------------------------------------------------
 // Theme
 // ---------------------------------------------------------------------------
 

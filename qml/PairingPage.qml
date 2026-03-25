@@ -14,6 +14,14 @@ Rectangle {
     property string foundServerUrl: ""
     property string errorMessage: ""
 
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0
+            var v = c === 'x' ? r : (r & 0x3 | 0x8)
+            return v.toString(16)
+        })
+    }
+
     ColumnLayout {
         anchors.centerIn: parent
         width: parent.width * 0.8
@@ -180,10 +188,18 @@ Rectangle {
     Connections {
         target: Client
         function onLoginSuccess() {
-            root.pairingComplete()
+            // Generate a pairing token and send to tablet
+            var token = generateUUID()
+            Client.pair(token)
         }
         function onLoginFailed(error) {
             root.errorMessage = error || "Login failed"
+        }
+        function onPairingComplete(deviceId, deviceName) {
+            root.pairingComplete()
+        }
+        function onConnectionError(error) {
+            root.errorMessage = error
         }
     }
 
