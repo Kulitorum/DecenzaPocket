@@ -46,6 +46,13 @@ qt_add_resources(DecenzaPocket "sounds"
         resources/sounds/ready.wav
 )
 
+qt_add_resources(DecenzaPocket "icons"
+    PREFIX "/"
+    FILES
+        resources/icons/back.svg
+        resources/icons/settings.svg
+)
+
 set_source_files_properties(qml/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 qt_add_qml_module(DecenzaPocket
@@ -59,6 +66,7 @@ qt_add_qml_module(DecenzaPocket
         qml/ConnectionIndicator.qml
         qml/PairingPage.qml
         qml/SettingsPage.qml
+        qml/BottomBar.qml
 )
 
 target_include_directories(DecenzaPocket PRIVATE

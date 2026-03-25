@@ -32,7 +32,10 @@ ApplicationWindow {
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: Theme.spacingMedium
+                anchors.bottomMargin: 56  // Leave room for bottom bar
+                anchors.topMargin: Theme.spacingMedium
+                anchors.leftMargin: Theme.spacingMedium
+                anchors.rightMargin: Theme.spacingMedium
                 spacing: Theme.spacingMedium
 
                 // Header
@@ -72,28 +75,18 @@ ApplicationWindow {
                     }
                 }
 
-                Item { Layout.preferredHeight: Theme.spacingSmall }
-
                 // Connection indicator
                 ConnectionIndicator {
                     mode: Connection.mode
                     Layout.alignment: Qt.AlignHCenter
                 }
+            }
 
-                // Settings link
-                Text {
-                    text: "Settings"
-                    color: Theme.primaryColor
-                    font.pixelSize: Theme.bodySize
-                    font.underline: true
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.bottomMargin: Theme.spacingMedium
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: stackView.push(settingsView)
-                    }
-                }
+            // Bottom bar with settings cog
+            BottomBar {
+                title: "Decenza Pocket"
+                iconSource: "qrc:/icons/settings.svg"
+                onClicked: stackView.push(settingsView)
             }
 
             // Auto-connect on load via ConnectionManager

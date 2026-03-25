@@ -11,31 +11,11 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Theme.spacingMedium
+        anchors.bottomMargin: 56  // Leave room for bottom bar
+        anchors.topMargin: Theme.spacingMedium
+        anchors.leftMargin: Theme.spacingMedium
+        anchors.rightMargin: Theme.spacingMedium
         spacing: Theme.spacingLarge
-
-        // Header with back button
-        RowLayout {
-            spacing: Theme.spacingSmall
-
-            Text {
-                text: "<"
-                color: Theme.primaryColor
-                font.pixelSize: Theme.titleSize
-                font.bold: true
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: root.back()
-                }
-            }
-
-            Text {
-                text: "Settings"
-                color: Theme.textColor
-                font.pixelSize: Theme.headingSize
-                font.bold: true
-            }
-        }
 
         // Paired device
         Rectangle {
@@ -156,7 +136,13 @@ Rectangle {
             color: Theme.textSecondaryColor
             font.pixelSize: Theme.labelSize
             Layout.alignment: Qt.AlignHCenter
-            Layout.bottomMargin: Theme.spacingMedium
         }
+    }
+
+    // Bottom bar with back button
+    BottomBar {
+        title: "Settings"
+        showBackButton: true
+        onBackClicked: root.back()
     }
 }

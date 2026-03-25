@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>sounds/ready.wav</file>
+        <file>icons/back.svg</file>
+        <file>icons/settings.svg</file>
     </qresource>
 </RCC>
