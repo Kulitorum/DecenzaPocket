@@ -9,24 +9,28 @@
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
 #include <QCoreApplication>
+#include <QNativeInterface>
 
 static void startKeepAliveService()
 {
-    QJniObject activity = QJniObject::callStaticObjectMethod(
-        "org/qtproject/qt/android/QtNative", "activity",
-        "()Landroid/app/Activity;");
-    if (!activity.isValid()) return;
+    QJniObject context = QNativeInterface::QAndroidApplication::context();
+    if (!context.isValid()) {
+        qWarning() << "ConnectionManager: no Android context for service start";
+        return;
+    }
+
+    QJniObject className = QJniObject::fromString(
+        "io.github.kulitorum.decenzapocket.KeepAliveService");
+    QJniObject cls = QJniObject::callStaticObjectMethod(
+        "java/lang/Class", "forName",
+        "(Ljava/lang/String;)Ljava/lang/Class;",
+        className.object<jstring>());
 
     QJniObject intent("android/content/Intent",
         "(Landroid/content/Context;Ljava/lang/Class;)V",
-        activity.object(),
-        QJniObject::callStaticObjectMethod(
-            "java/lang/Class", "forName",
-            "(Ljava/lang/String;)Ljava/lang/Class;",
-            QJniObject::fromString("io.github.kulitorum.decenzapocket.KeepAliveService").object<jstring>()
-        ).object());
+        context.object(), cls.object());
 
-    activity.callObjectMethod("startForegroundService",
+    context.callObjectMethod("startForegroundService",
         "(Landroid/content/Intent;)Landroid/content/ComponentName;",
         intent.object());
     qDebug() << "ConnectionManager: started KeepAliveService";
@@ -34,21 +38,21 @@ static void startKeepAliveService()
 
 static void stopKeepAliveService()
 {
-    QJniObject activity = QJniObject::callStaticObjectMethod(
-        "org/qtproject/qt/android/QtNative", "activity",
-        "()Landroid/app/Activity;");
-    if (!activity.isValid()) return;
+    QJniObject context = QNativeInterface::QAndroidApplication::context();
+    if (!context.isValid()) return;
+
+    QJniObject className = QJniObject::fromString(
+        "io.github.kulitorum.decenzapocket.KeepAliveService");
+    QJniObject cls = QJniObject::callStaticObjectMethod(
+        "java/lang/Class", "forName",
+        "(Ljava/lang/String;)Ljava/lang/Class;",
+        className.object<jstring>());
 
     QJniObject intent("android/content/Intent",
         "(Landroid/content/Context;Ljava/lang/Class;)V",
-        activity.object(),
-        QJniObject::callStaticObjectMethod(
-            "java/lang/Class", "forName",
-            "(Ljava/lang/String;)Ljava/lang/Class;",
-            QJniObject::fromString("io.github.kulitorum.decenzapocket.KeepAliveService").object<jstring>()
-        ).object());
+        context.object(), cls.object());
 
-    activity.callMethod<jboolean>("stopService",
+    context.callMethod<jboolean>("stopService",
         "(Landroid/content/Intent;)Z",
         intent.object());
     qDebug() << "ConnectionManager: stopped KeepAliveService";
