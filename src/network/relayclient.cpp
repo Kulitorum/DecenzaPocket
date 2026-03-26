@@ -143,11 +143,11 @@ void RelayClient::onTextMessageReceived(const QString& message)
         emit statusReceived(state, phase, temperature, waterLevelMl,
                             heating, ready, awake);
 
-        // Ready notification edge detection: Heating -> Ready
-        if (m_wasHeating && ready) {
+        // Ready notification: fire when phase changes from Heating to Ready
+        if (m_previousPhase == "Heating" && phase == "Ready") {
             emit readyNotification();
         }
-        m_wasHeating = heating;
+        m_previousPhase = phase;
 
     } else if (type == QLatin1String("relay_response")) {
         QString commandId = json.value("commandId").toString();

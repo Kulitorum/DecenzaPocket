@@ -41,5 +41,5 @@ private:
     QTimer m_pingTimer;
     Settings* m_settings;
     int m_reconnectAttempts = 0;
-    bool m_wasHeating = false;
+    QString m_previousPhase;
 };
