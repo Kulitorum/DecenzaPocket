@@ -112,4 +112,15 @@ if(IOS)
         MACOSX_BUNDLE_BUNDLE_VERSION "${CURRENT_VERSION_CODE}"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
     )
+
+    # Use native AVFoundation backend only (no FFmpeg)
+    qt_import_plugins(DecenzaPocket
+        INCLUDE_BY_TYPE multimedia Qt6::QDarwinMediaPlugin
+    )
+
+    target_link_libraries(DecenzaPocket PRIVATE
+        "-framework AVFoundation"
+        "-framework CoreAudio"
+        "-framework AudioToolbox"
+    )
 endif()
