@@ -6,7 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.os.Build;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.PowerManager;
 
@@ -14,16 +14,22 @@ public class KeepAliveService extends Service {
     private static final String CHANNEL_ID = "decenza_pocket_service";
     private static final int NOTIFICATION_ID = 1;
     private PowerManager.WakeLock wakeLock;
+    private WifiManager.WifiLock wifiLock;
 
     @Override
     public void onCreate() {
         super.onCreate();
         createNotificationChannel();
 
-        // Acquire partial wake lock to keep CPU running
+        // Partial wake lock keeps CPU running
         PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "DecenzaPocket::KeepAlive");
         wakeLock.acquire();
+
+        // WiFi lock keeps WiFi active (for local connection)
+        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+        wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "DecenzaPocket::WifiKeepAlive");
+        wifiLock.acquire();
     }
 
     @Override
@@ -47,6 +53,9 @@ public class KeepAliveService extends Service {
 
     @Override
     public void onDestroy() {
+        if (wifiLock != null && wifiLock.isHeld()) {
+            wifiLock.release();
+        }
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
         }
