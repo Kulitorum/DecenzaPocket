@@ -1,4 +1,5 @@
 #include "settings.h"
+#include <QDebug>
 
 Settings::Settings(QObject* parent)
     : QObject(parent)
@@ -24,7 +25,13 @@ void Settings::setPairedDevice(const QString& deviceId, const QString& name,
 
 void Settings::clearPairedDevice()
 {
-    m_settings.remove("device");
+    m_settings.remove("device/id");
+    m_settings.remove("device/name");
+    m_settings.remove("device/serverUrl");
+    m_settings.remove("device/pairingToken");
+    m_settings.remove("device/sessionCookie");
+    m_settings.sync();
+    qDebug() << "Settings: cleared pairedDevice, isPaired:" << isPaired();
     emit pairedDeviceChanged();
 }
 
