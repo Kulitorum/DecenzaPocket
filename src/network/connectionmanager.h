@@ -64,6 +64,7 @@ private:
     DecenzaClient* m_localClient;
     RelayClient* m_remoteClient;
     QString m_mode = "disconnected";
+    bool m_active = false;  // true between start() and disconnect()
 
     // Unified status (updated from whichever client is active)
     QString m_machineState = "Disconnected";

@@ -47,6 +47,7 @@ void ConnectionManager::start()
         return;
     }
 
+    m_active = true;
     qDebug() << "ConnectionManager: starting discovery";
     m_discovery->startSearch();
 }
@@ -81,9 +82,12 @@ void ConnectionManager::sleep()
 
 void ConnectionManager::disconnect()
 {
+    m_active = false;
     m_localClient->disconnect();
     m_remoteClient->disconnect();
+    m_discovery->stopSearch();
     setMode(QStringLiteral("disconnected"));
+    qDebug() << "ConnectionManager: disconnected, active=false";
 }
 
 // ---------------------------------------------------------------------------
@@ -92,6 +96,7 @@ void ConnectionManager::disconnect()
 
 void ConnectionManager::onLocalStatusUpdated()
 {
+    if (!m_active) return;
     m_machineState = m_localClient->machineState();
     m_machinePhase = m_localClient->machinePhase();
     m_temperature = m_localClient->temperature();
@@ -105,6 +110,7 @@ void ConnectionManager::onLocalStatusUpdated()
 
 void ConnectionManager::onLocalConnectedChanged()
 {
+    if (!m_active) return;
     qDebug() << "ConnectionManager: local connected changed:"
              << m_localClient->isConnected() << "current mode:" << m_mode;
     if (m_localClient->isConnected()) {
@@ -162,6 +168,11 @@ void ConnectionManager::onDiscoveryFound(const QString& deviceName, const QStrin
     Q_UNUSED(port)
     Q_UNUSED(secure)
 
+    if (!m_active) {
+        qDebug() << "ConnectionManager: ignoring discovery (not active)";
+        return;
+    }
+
     qDebug() << "ConnectionManager: local device found at" << serverUrl;
     m_localClient->connectToServer(serverUrl);
     setMode(QStringLiteral("local"));
@@ -169,6 +180,7 @@ void ConnectionManager::onDiscoveryFound(const QString& deviceName, const QStrin
 
 void ConnectionManager::onDiscoveryFailed()
 {
+    if (!m_active) return;
     qDebug() << "ConnectionManager: local discovery failed, trying remote";
     if (m_settings->isPaired()) {
         tryRemoteFallback();
