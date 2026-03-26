@@ -67,6 +67,7 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 64
                     isAwake: Connection.isAwake
+                    connected: Connection.mode !== "disconnected"
                     onToggled: {
                         if (Connection.isAwake)
                             Connection.sleep()
