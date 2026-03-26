@@ -34,7 +34,6 @@ jobs:
           fetch-depth: 0  # Full history for version tags
 
       - name: Bump version code
-        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
         id: bump
         run: |
           CURRENT=$(cat versioncode.txt | tr -d '[:space:]')
@@ -229,6 +228,36 @@ jobs:
           retention-days: 90
           overwrite: true
           if-no-files-found: warn
+
+      - name: Commit version code back to master
+        run: |
+          BUILD_CODE="${{ steps.bump.outputs.build_code }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin master
+          git stash --include-untracked
+          git checkout origin/master
+          echo "$BUILD_CODE" > versioncode.txt
+          git add versioncode.txt
+          if git diff --cached --quiet; then
+            echo "No version code changes to commit"
+          else
+            git commit -m "ci: bump version code to $BUILD_CODE [skip ci]"
+            PUSH_OK=false
+            for attempt in 1 2 3; do
+              if git push origin HEAD:master; then
+                echo "Committed version code $BUILD_CODE back to master"
+                PUSH_OK=true
+                break
+              else
+                echo "Push failed (attempt $attempt/3), rebasing..."
+                git pull --rebase origin master
+              fi
+            done
+            if [ "$PUSH_OK" != "true" ]; then
+              echo "::warning::Could not push version code $BUILD_CODE back to master after 3 attempts"
+            fi
+          fi
 
       - name: Cleanup keychain
         if: always()

@@ -21,6 +21,7 @@
     <application
         android:name="org.qtproject.qt.android.bindings.QtApplication"
         android:label="Decenza Pocket"
+        android:icon="@drawable/icon"
         android:hardwareAccelerated="true"
         android:theme="@style/AppTheme">
         <activity
