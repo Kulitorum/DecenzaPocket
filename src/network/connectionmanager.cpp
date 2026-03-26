@@ -6,6 +6,55 @@
 
 #include <QDebug>
 
+#ifdef Q_OS_ANDROID
+#include <QJniObject>
+#include <QCoreApplication>
+
+static void startKeepAliveService()
+{
+    QJniObject activity = QJniObject::callStaticObjectMethod(
+        "org/qtproject/qt/android/QtNative", "activity",
+        "()Landroid/app/Activity;");
+    if (!activity.isValid()) return;
+
+    QJniObject intent("android/content/Intent",
+        "(Landroid/content/Context;Ljava/lang/Class;)V",
+        activity.object(),
+        QJniObject::callStaticObjectMethod(
+            "java/lang/Class", "forName",
+            "(Ljava/lang/String;)Ljava/lang/Class;",
+            QJniObject::fromString("io.github.kulitorum.decenzapocket.KeepAliveService").object<jstring>()
+        ).object());
+
+    activity.callObjectMethod("startForegroundService",
+        "(Landroid/content/Intent;)Landroid/content/ComponentName;",
+        intent.object());
+    qDebug() << "ConnectionManager: started KeepAliveService";
+}
+
+static void stopKeepAliveService()
+{
+    QJniObject activity = QJniObject::callStaticObjectMethod(
+        "org/qtproject/qt/android/QtNative", "activity",
+        "()Landroid/app/Activity;");
+    if (!activity.isValid()) return;
+
+    QJniObject intent("android/content/Intent",
+        "(Landroid/content/Context;Ljava/lang/Class;)V",
+        activity.object(),
+        QJniObject::callStaticObjectMethod(
+            "java/lang/Class", "forName",
+            "(Ljava/lang/String;)Ljava/lang/Class;",
+            QJniObject::fromString("io.github.kulitorum.decenzapocket.KeepAliveService").object<jstring>()
+        ).object());
+
+    activity.callMethod<jboolean>("stopService",
+        "(Landroid/content/Intent;)Z",
+        intent.object());
+    qDebug() << "ConnectionManager: stopped KeepAliveService";
+}
+#endif
+
 ConnectionManager::ConnectionManager(Settings* settings, Discovery* discovery,
                                      DecenzaClient* localClient, RelayClient* remoteClient,
                                      QObject* parent)
@@ -195,6 +244,14 @@ void ConnectionManager::setMode(const QString& mode)
     if (m_mode != mode) {
         m_mode = mode;
         qDebug() << "ConnectionManager: mode changed to" << m_mode;
+#ifdef Q_OS_ANDROID
+        // Start foreground service when connected to keep WebSocket alive
+        if (m_mode == QLatin1String("local") || m_mode == QLatin1String("remote")) {
+            startKeepAliveService();
+        } else {
+            stopKeepAliveService();
+        }
+#endif
         emit modeChanged();
     }
 }
