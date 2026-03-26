@@ -135,16 +135,25 @@ void RelayClient::onTextMessageReceived(const QString& message)
         QString state = json.value("state").toString();
         QString phase = json.value("phase").toString();
         double temperature = json.value("temperature").toDouble();
+        double goalTemperature = json.value("goalTemperature").toDouble();
         double waterLevelMl = json.value("waterLevelMl").toDouble();
         bool heating = json.value("isHeating").toBool();
         bool ready = json.value("isReady").toBool();
         bool awake = json.value("isAwake").toBool();
+
+        // Override phase: DE1 reports "Ready" before reaching target temp
+        if (goalTemperature > 0 && temperature > 0 &&
+            (phase == "Ready" || phase == "Idle") &&
+            temperature < goalTemperature - 0.5) {
+            phase = QStringLiteral("Heating");
+        }
 
         emit statusReceived(state, phase, temperature, waterLevelMl,
                             heating, ready, awake);
 
         // Ready notification: fire when phase changes from Heating to Ready
         if (m_previousPhase == "Heating" && phase == "Ready") {
+            qDebug() << "RelayClient: Heating->Ready transition detected, firing notification";
             emit readyNotification();
         }
         m_previousPhase = phase;
