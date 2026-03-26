@@ -111,6 +111,16 @@ if(IOS)
         MACOSX_BUNDLE_GUI_IDENTIFIER "io.github.kulitorum.decenzapocket"
         MACOSX_BUNDLE_BUNDLE_VERSION "${CURRENT_VERSION_CODE}"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION}"
+        XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
+    )
+
+    # Add iOS asset catalog for app icon
+    target_sources(DecenzaPocket PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/ios/Assets.xcassets"
+    )
+    set_source_files_properties(
+        "${CMAKE_CURRENT_SOURCE_DIR}/ios/Assets.xcassets"
+        PROPERTIES MACOSX_PACKAGE_LOCATION Resources
     )
 
     # Use native AVFoundation backend only (no FFmpeg)
