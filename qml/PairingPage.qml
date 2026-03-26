@@ -67,7 +67,7 @@ Rectangle {
             }
         }
 
-        // Found - connecting or needs login
+        // Found - show connect button, or connecting/login
         ColumnLayout {
             visible: root.deviceFound
             spacing: Theme.spacingMedium
@@ -80,7 +80,32 @@ Rectangle {
                 Layout.alignment: Qt.AlignHCenter
             }
 
-            // Connecting spinner (shown while probing server)
+            // Connect button (shown before connecting)
+            Button {
+                visible: !root.connecting && !root.needsLogin
+                text: "Connect"
+                Layout.fillWidth: true
+                Layout.preferredHeight: 48
+                onClicked: {
+                    root.errorMessage = ""
+                    root.connecting = true
+                    Client.connectToServer(root.foundServerUrl)
+                }
+                background: Rectangle {
+                    color: Theme.primaryColor
+                    radius: Theme.cardRadius / 2
+                }
+                contentItem: Text {
+                    text: "Connect"
+                    color: Theme.primaryContrastColor
+                    font.pixelSize: Theme.bodySize
+                    font.bold: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+            }
+
+            // Connecting spinner
             ColumnLayout {
                 visible: root.connecting && !root.needsLogin
                 Layout.alignment: Qt.AlignHCenter
@@ -215,9 +240,6 @@ Rectangle {
             root.deviceFound = true
             root.foundDeviceName = deviceName
             root.foundServerUrl = serverUrl
-            // Auto-connect to probe if security is enabled
-            root.connecting = true
-            Client.connectToServer(serverUrl)
         }
         function onSearchFailed() {
             root.errorMessage = "No Decenza tablet found on this network.\nMake sure your phone is on the same WiFi as the tablet."
