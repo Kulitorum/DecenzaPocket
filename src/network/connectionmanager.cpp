@@ -48,8 +48,9 @@ void ConnectionManager::start()
     }
 
     m_active = true;
-    qDebug() << "ConnectionManager: starting discovery";
+    qDebug() << "ConnectionManager: starting discovery + remote in parallel";
     m_discovery->startSearch();
+    m_remoteClient->connectToRelay();
 }
 
 void ConnectionManager::wake()
@@ -174,6 +175,7 @@ void ConnectionManager::onDiscoveryFound(const QString& deviceName, const QStrin
     }
 
     qDebug() << "ConnectionManager: local device found at" << serverUrl;
+    m_remoteClient->disconnect(); // Local wins, stop remote
     m_localClient->connectToServer(serverUrl);
     setMode(QStringLiteral("local"));
 }
@@ -181,10 +183,7 @@ void ConnectionManager::onDiscoveryFound(const QString& deviceName, const QStrin
 void ConnectionManager::onDiscoveryFailed()
 {
     if (!m_active) return;
-    qDebug() << "ConnectionManager: local discovery failed, trying remote";
-    if (m_settings->isPaired()) {
-        tryRemoteFallback();
-    }
+    qDebug() << "ConnectionManager: local discovery failed, remote already connecting";
 }
 
 // ---------------------------------------------------------------------------
