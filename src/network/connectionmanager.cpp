@@ -9,8 +9,7 @@
 #ifdef Q_OS_ANDROID
 #include <QJniObject>
 #include <QCoreApplication>
-#include <QtCore/QNativeInterface>
-#include <QtGui/qguiapplication_platform.h>
+#include <QtCore/qcoreapplication_platform.h>
 
 static void startKeepAliveService()
 {
