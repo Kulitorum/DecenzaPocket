@@ -167,7 +167,7 @@ void RelayClient::onTextMessageReceived(const QString& message)
         qDebug() << "RelayClient: registered successfully";
 
     } else if (type == QLatin1String("error")) {
-        QString error = json.value("message").toString();
+        QString error = json.value("error").toString();
         qWarning() << "RelayClient: error from relay:" << error;
         emit connectionError(error);
 

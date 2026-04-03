@@ -9,17 +9,15 @@ RowLayout {
     Rectangle {
         width: 8; height: 8; radius: 4
         color: {
-            if (mode === "local") return Theme.successColor
-            if (mode === "remote") return Theme.primaryColor
+            if (mode === "remote") return Theme.successColor
             return Theme.textSecondaryColor
         }
     }
 
     Text {
         text: {
-            if (mode === "local") return "Connected over WiFi"
-            if (mode === "remote") return "Connected over internet"
-            return "Disconnected"
+            if (mode === "remote") return "Connected"
+            return "Connecting"
         }
         color: Theme.textSecondaryColor
         font.pixelSize: Theme.labelSize

@@ -12,10 +12,11 @@ Rectangle {
     property double waterLevelMl: 0
     property bool isHeating: false
     property bool isReady: false
+    property bool connected: false
 
     function stateColor() {
         var display = displayState()
-        if (display === "Sleep" || display === "Disconnected" || display === "Unknown")
+        if (display === "Connecting" || display === "Sleep" || display === "Disconnected" || display === "Unknown")
             return Theme.textSecondaryColor
         if (display === "Heating")
             return Theme.warningColor
@@ -25,6 +26,7 @@ Rectangle {
     }
 
     function displayState() {
+        if (!connected) return "Connecting"
         // Prefer phase (Heating, Ready, etc.) over raw BLE state
         if (machinePhase && machinePhase !== "Disconnected")
             return machinePhase

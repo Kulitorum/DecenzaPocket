@@ -1,40 +1,20 @@
 #include "network/connectionmanager.h"
-#include "network/decenzaclient.h"
 #include "network/relayclient.h"
-#include "network/discovery.h"
 #include "core/settings.h"
 
 #include <QDebug>
 
 
-ConnectionManager::ConnectionManager(Settings* settings, Discovery* discovery,
-                                     DecenzaClient* localClient, RelayClient* remoteClient,
+ConnectionManager::ConnectionManager(Settings* settings, RelayClient* remoteClient,
                                      QObject* parent)
     : QObject(parent)
     , m_settings(settings)
-    , m_discovery(discovery)
-    , m_localClient(localClient)
     , m_remoteClient(remoteClient)
 {
-    // Local client signals
-    connect(m_localClient, &DecenzaClient::statusUpdated,
-            this, &ConnectionManager::onLocalStatusUpdated);
-    connect(m_localClient, &DecenzaClient::connectedChanged,
-            this, &ConnectionManager::onLocalConnectedChanged);
-    connect(m_localClient, &DecenzaClient::loginRequired,
-            this, &ConnectionManager::onLocalLoginRequired);
-
-    // Remote client signals
     connect(m_remoteClient, &RelayClient::statusReceived,
             this, &ConnectionManager::onRemoteStatusReceived);
     connect(m_remoteClient, &RelayClient::connectedChanged,
             this, &ConnectionManager::onRemoteConnectedChanged);
-
-    // Discovery signals
-    connect(m_discovery, &Discovery::deviceFound,
-            this, &ConnectionManager::onDiscoveryFound);
-    connect(m_discovery, &Discovery::searchFailed,
-            this, &ConnectionManager::onDiscoveryFailed);
 }
 
 // ---------------------------------------------------------------------------
@@ -48,20 +28,13 @@ void ConnectionManager::start()
         return;
     }
 
-    m_active = true;
-    qDebug() << "ConnectionManager: starting discovery + remote in parallel";
-    m_discovery->startSearch();
+    qDebug() << "ConnectionManager: starting relay connection";
     m_remoteClient->connectToRelay();
 }
 
 void ConnectionManager::wake()
 {
-    qDebug() << "ConnectionManager: wake() mode:" << m_mode
-             << "local:" << m_localClient->isConnected()
-             << "remote:" << m_remoteClient->isConnected();
-    if (m_localClient->isConnected()) {
-        m_localClient->wake();
-    } else if (m_remoteClient->isConnected()) {
+    if (m_remoteClient->isConnected()) {
         m_remoteClient->sendCommand(QStringLiteral("wake"));
     } else {
         qWarning() << "ConnectionManager: wake() called but no connection available";
@@ -70,12 +43,7 @@ void ConnectionManager::wake()
 
 void ConnectionManager::sleep()
 {
-    qDebug() << "ConnectionManager: sleep() mode:" << m_mode
-             << "local:" << m_localClient->isConnected()
-             << "remote:" << m_remoteClient->isConnected();
-    if (m_localClient->isConnected()) {
-        m_localClient->sleep();
-    } else if (m_remoteClient->isConnected()) {
+    if (m_remoteClient->isConnected()) {
         m_remoteClient->sendCommand(QStringLiteral("sleep"));
     } else {
         qWarning() << "ConnectionManager: sleep() called but no connection available";
@@ -84,48 +52,9 @@ void ConnectionManager::sleep()
 
 void ConnectionManager::disconnect()
 {
-    m_active = false;
-    m_localClient->disconnect();
     m_remoteClient->disconnect();
-    m_discovery->stopSearch();
     setMode(QStringLiteral("disconnected"));
-    qDebug() << "ConnectionManager: disconnected, active=false";
-}
-
-// ---------------------------------------------------------------------------
-// Local client slots
-// ---------------------------------------------------------------------------
-
-void ConnectionManager::onLocalStatusUpdated()
-{
-    if (!m_active) return;
-    m_machineState = m_localClient->machineState();
-    m_machinePhase = m_localClient->machinePhase();
-    m_temperature = m_localClient->temperature();
-    m_waterLevelMl = m_localClient->waterLevelMl();
-    m_isHeating = m_localClient->isHeating();
-    m_isReady = m_localClient->isReady();
-    m_isAwake = m_localClient->isAwake();
-
-    emit statusChanged();
-}
-
-void ConnectionManager::onLocalConnectedChanged()
-{
-    if (!m_active) return;
-    qDebug() << "ConnectionManager: local connected changed:"
-             << m_localClient->isConnected() << "current mode:" << m_mode;
-    if (m_localClient->isConnected()) {
-        setMode(QStringLiteral("local"));
-    } else if (m_mode == QLatin1String("local")) {
-        qDebug() << "ConnectionManager: local connection lost, falling back to remote";
-        tryRemoteFallback();
-    }
-}
-
-void ConnectionManager::onLocalLoginRequired()
-{
-    emit loginRequired();
+    qDebug() << "ConnectionManager: disconnected";
 }
 
 // ---------------------------------------------------------------------------
@@ -151,40 +80,12 @@ void ConnectionManager::onRemoteStatusReceived(const QString& state, const QStri
 void ConnectionManager::onRemoteConnectedChanged()
 {
     qDebug() << "ConnectionManager: remote connected changed:"
-             << m_remoteClient->isConnected() << "current mode:" << m_mode;
-    if (m_remoteClient->isConnected() && m_mode != QLatin1String("local")) {
+             << m_remoteClient->isConnected();
+    if (m_remoteClient->isConnected()) {
         setMode(QStringLiteral("remote"));
-    } else if (!m_remoteClient->isConnected() && m_mode == QLatin1String("remote")) {
+    } else {
         setMode(QStringLiteral("disconnected"));
     }
-}
-
-// ---------------------------------------------------------------------------
-// Discovery slots
-// ---------------------------------------------------------------------------
-
-void ConnectionManager::onDiscoveryFound(const QString& deviceName, const QString& serverUrl,
-                                         int port, bool secure)
-{
-    Q_UNUSED(deviceName)
-    Q_UNUSED(port)
-    Q_UNUSED(secure)
-
-    if (!m_active) {
-        qDebug() << "ConnectionManager: ignoring discovery (not active)";
-        return;
-    }
-
-    qDebug() << "ConnectionManager: local device found at" << serverUrl;
-    m_remoteClient->disconnect(); // Local wins, stop remote
-    m_localClient->connectToServer(serverUrl);
-    setMode(QStringLiteral("local"));
-}
-
-void ConnectionManager::onDiscoveryFailed()
-{
-    if (!m_active) return;
-    qDebug() << "ConnectionManager: local discovery failed, remote already connecting";
 }
 
 // ---------------------------------------------------------------------------
@@ -198,10 +99,4 @@ void ConnectionManager::setMode(const QString& mode)
         qDebug() << "ConnectionManager: mode changed to" << m_mode;
         emit modeChanged();
     }
-}
-
-void ConnectionManager::tryRemoteFallback()
-{
-    qDebug() << "ConnectionManager: attempting remote relay connection";
-    m_remoteClient->connectToRelay();
 }

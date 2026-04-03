@@ -52,6 +52,7 @@ ApplicationWindow {
                 StatusCard {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 200
+                    connected: Connection.mode !== "disconnected"
                     machineState: Connection.machineState
                     machinePhase: Connection.machinePhase
                     temperature: Connection.temperature
@@ -104,14 +105,6 @@ ApplicationWindow {
         SettingsPage {
             onBack: stackView.pop()
             onUnpaired: stackView.replace(pairingView)
-        }
-    }
-
-    // Handle login required (session expired)
-    Connections {
-        target: Connection
-        function onLoginRequired() {
-            stackView.replace(pairingView)
         }
     }
 }

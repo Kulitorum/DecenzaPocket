@@ -32,15 +32,11 @@ int main(int argc, char *argv[])
     Discovery discovery;
     DecenzaClient localClient(&settings);
     RelayClient remoteClient(&settings);
-    ConnectionManager connection(&settings, &discovery, &localClient, &remoteClient);
+    ConnectionManager connection(&settings, &remoteClient);
     NotificationManager notifications;
 
-    // Ready notifications from both local and remote
-    QObject::connect(&localClient, &DecenzaClient::readyNotification,
-                     &notifications, &NotificationManager::playReadySound);
+    // Ready notifications from relay
     QObject::connect(&remoteClient, &RelayClient::readyNotification,
-                     &notifications, &NotificationManager::playReadySound);
-    QObject::connect(&connection, &ConnectionManager::readyNotification,
                      &notifications, &NotificationManager::playReadySound);
 
     // Save theme data when fetched from the local server
