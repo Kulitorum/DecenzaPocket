@@ -19,6 +19,8 @@ public:
     Q_INVOKABLE void disconnect();
     Q_INVOKABLE void sendCommand(const QString& command);
 
+    QWebSocket* socket() { return &m_socket; }
+
 signals:
     void connectedChanged();
     void statusReceived(const QString& state, const QString& phase,
@@ -27,6 +29,7 @@ signals:
     void commandResult(const QString& commandId, bool success);
     void readyNotification();
     void connectionError(const QString& error);
+    void binaryMessageReceived(const QByteArray& data);
 
 private slots:
     void onConnected();

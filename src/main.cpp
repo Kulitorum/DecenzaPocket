@@ -11,6 +11,7 @@
 #include "network/decenzaclient.h"
 #include "network/relayclient.h"
 #include "network/connectionmanager.h"
+#include "network/remotecontrolclient.h"
 
 int main(int argc, char *argv[])
 {
@@ -32,6 +33,7 @@ int main(int argc, char *argv[])
     Discovery discovery;
     DecenzaClient localClient(&settings);
     RelayClient remoteClient(&settings);
+    RemoteControlClient remoteControl(remoteClient.socket());
     ConnectionManager connection(&settings, &remoteClient);
     NotificationManager notifications;
 
@@ -39,11 +41,17 @@ int main(int argc, char *argv[])
     QObject::connect(&remoteClient, &RelayClient::readyNotification,
                      &notifications, &NotificationManager::playReadySound);
 
+    // Forward binary WebSocket messages to remote control client
+    QObject::connect(&remoteClient, &RelayClient::binaryMessageReceived,
+                     &remoteControl, &RemoteControlClient::handleBinaryMessage);
+
     // Save theme data when fetched from the local server
     QObject::connect(&localClient, &DecenzaClient::themeReceived,
                      &settings, &Settings::setThemeData);
 
     QQmlApplicationEngine engine;
+    engine.addImageProvider("remoteframe", new RemoteFrameProvider(&remoteControl));
+    engine.rootContext()->setContextProperty("RemoteControl", &remoteControl);
     engine.rootContext()->setContextProperty("Settings", &settings);
     engine.rootContext()->setContextProperty("Discovery", &discovery);
     engine.rootContext()->setContextProperty("Client", &localClient);

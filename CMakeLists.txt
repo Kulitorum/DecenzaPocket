@@ -36,6 +36,8 @@ set(SOURCES
     src/network/relayclient.cpp
     src/network/connectionmanager.h
     src/network/connectionmanager.cpp
+    src/network/remotecontrolclient.h
+    src/network/remotecontrolclient.cpp
 )
 
 qt_add_executable(DecenzaPocket ${SOURCES})
@@ -67,6 +69,7 @@ qt_add_resources(DecenzaPocket "qml"
         qml/PairingPage.qml
         qml/SettingsPage.qml
         qml/BottomBar.qml
+        qml/RemoteControlPage.qml
 )
 
 target_include_directories(DecenzaPocket PRIVATE

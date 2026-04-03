@@ -33,6 +33,7 @@ public:
     Q_INVOKABLE void wake();
     Q_INVOKABLE void sleep();
     Q_INVOKABLE void disconnect();
+    Q_INVOKABLE void sendCommand(const QString& command);
 
 signals:
     void modeChanged();

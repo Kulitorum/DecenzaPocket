@@ -57,6 +57,13 @@ void ConnectionManager::disconnect()
     qDebug() << "ConnectionManager: disconnected";
 }
 
+void ConnectionManager::sendCommand(const QString& command)
+{
+    if (m_remoteClient->isConnected()) {
+        m_remoteClient->sendCommand(command);
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Remote client slots
 // ---------------------------------------------------------------------------

@@ -63,6 +63,31 @@ ApplicationWindow {
 
                 Item { Layout.fillHeight: true }
 
+                // Remote control button
+                Button {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 48
+                    enabled: Connection.mode !== "disconnected"
+                    onClicked: {
+                        Connection.sendCommand("start_remote")
+                        stackView.push(remoteControlView)
+                    }
+                    background: Rectangle {
+                        color: parent.enabled ? Theme.surfaceColor : Theme.surfaceColor
+                        radius: Theme.cardRadius / 2
+                        border.color: parent.enabled ? Theme.primaryColor : Theme.borderColor
+                        border.width: 1
+                    }
+                    contentItem: Text {
+                        text: "Remote Control"
+                        color: parent.enabled ? Theme.primaryColor : Theme.textSecondaryColor
+                        font.pixelSize: Theme.bodySize
+                        font.bold: true
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+
                 // Power button
                 PowerButton {
                     Layout.fillWidth: true
@@ -96,6 +121,16 @@ ApplicationWindow {
                 if (Settings.isPaired) {
                     Connection.start()
                 }
+            }
+        }
+    }
+
+    Component {
+        id: remoteControlView
+        RemoteControlPage {
+            onBack: {
+                Connection.sendCommand("stop_remote")
+                stackView.pop()
             }
         }
     }

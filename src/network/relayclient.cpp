@@ -24,6 +24,8 @@ RelayClient::RelayClient(Settings* settings, QObject* parent)
         for (const auto& e : errors)
             qWarning() << "RelayClient: SSL error:" << e.errorString();
     });
+    connect(&m_socket, &QWebSocket::binaryMessageReceived,
+            this, &RelayClient::binaryMessageReceived);
 
     m_reconnectTimer.setSingleShot(true);
     connect(&m_reconnectTimer, &QTimer::timeout,
