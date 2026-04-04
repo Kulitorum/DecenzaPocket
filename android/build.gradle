@@ -6,6 +6,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:8.10.1'
+        classpath 'com.google.gms:google-services:4.4.2'
     }
 }
 
@@ -15,9 +16,13 @@ repositories {
 }
 
 apply plugin: qtGradlePluginType
+apply plugin: 'com.google.gms.google-services'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }
 
 android {
