@@ -17,7 +17,7 @@ configure_file(
 )
 
 find_package(Qt6 6.8 REQUIRED COMPONENTS
-    Core Gui Qml Quick QuickControls2 Network WebSockets Multimedia
+    Core Gui Qml Quick QuickControls2 Network WebSockets Multimedia Svg
 )
 
 qt_standard_project_setup(REQUIRES 6.8)
@@ -88,7 +88,7 @@ target_include_directories(DecenzaPocket PRIVATE
 
 target_link_libraries(DecenzaPocket PRIVATE
     Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick Qt6::QuickControls2
-    Qt6::Network Qt6::WebSockets Qt6::Multimedia
+    Qt6::Network Qt6::WebSockets Qt6::Multimedia Qt6::Svg
 )
 
 set_target_properties(DecenzaPocket PROPERTIES
@@ -145,7 +145,7 @@ if(IOS)
     # Use native AVFoundation backend only (no FFmpeg)
     qt_import_plugins(DecenzaPocket
         INCLUDE_BY_TYPE multimedia Qt6::QDarwinMediaPlugin
-        INCLUDE_BY_TYPE imageformats Qt6::QWebpPlugin
+        INCLUDE_BY_TYPE imageformats Qt6::QWebpPlugin Qt6::QSvgPlugin
     )
 
     target_link_libraries(DecenzaPocket PRIVATE
