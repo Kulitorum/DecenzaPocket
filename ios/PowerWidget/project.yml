@@ -1,0 +1,27 @@
+name: PowerWidget
+options:
+  bundleIdPrefix: io.github.kulitorum.decenzapocket
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+targets:
+  PowerWidgetExtension:
+    type: app-extension
+    platform: iOS
+    productName: PowerWidgetExtension
+    sources:
+      - path: .
+        excludes:
+          - "project.yml"
+          - "PowerWidget.xcodeproj"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.github.kulitorum.decenzapocket.PowerWidget
+        SWIFT_VERSION: "5.9"
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Info.plist
+        CODE_SIGN_ENTITLEMENTS: PowerWidgetExtension.entitlements
+        MARKETING_VERSION: "$(MARKETING_VERSION)"
+        CURRENT_PROJECT_VERSION: "$(CURRENT_PROJECT_VERSION)"
+    entitlements:
+      path: PowerWidgetExtension.entitlements
