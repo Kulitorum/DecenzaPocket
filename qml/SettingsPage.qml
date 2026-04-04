@@ -197,7 +197,7 @@ Rectangle {
 
         // Version
         Text {
-            text: "DecenzaPocket v0.1.0"
+            text: "DecenzaPocket v0.2.0"
             color: Theme.textSecondaryColor
             font.pixelSize: Theme.labelSize
             Layout.alignment: Qt.AlignHCenter
