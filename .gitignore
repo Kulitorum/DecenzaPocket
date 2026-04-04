@@ -31,6 +31,9 @@ Makefile
 *.swo
 *~
 
+# Secrets
+Secrets/
+
 # OS
 .DS_Store
 Thumbs.db
