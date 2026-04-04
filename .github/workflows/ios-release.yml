@@ -48,7 +48,7 @@ jobs:
           version: '6.10.2'
           target: 'ios'
           arch: 'ios'
-          modules: 'qtshadertools qtmultimedia qtwebsockets'
+          modules: 'qtshadertools qtmultimedia qtwebsockets qtimageformats'
           cache: true
           cache-key-prefix: 'qt-ios-v1'
 
