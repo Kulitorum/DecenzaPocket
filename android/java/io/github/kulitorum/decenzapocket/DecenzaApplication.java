@@ -7,9 +7,11 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.qtproject.qt.android.bindings.QtApplication;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import org.json.JSONObject;
 
@@ -24,21 +26,24 @@ public class DecenzaApplication extends QtApplication {
 
         SharedPreferences qtPrefs = getSharedPreferences(QT_PREFS_NAME, MODE_PRIVATE);
         String deviceId = qtPrefs.getString("device/id", "");
+        String pairingToken = qtPrefs.getString("device/pairingToken", "");
 
-        if (!deviceId.isEmpty()) {
+        if (!deviceId.isEmpty() && !pairingToken.isEmpty()) {
             // Register FCM token with relay
             FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token -> {
                 new Thread(() -> DecenzaFcmService.registerToken(this, token)).start();
             });
 
             // Fetch initial device state for widget
-            new Thread(() -> fetchInitialState(deviceId)).start();
+            new Thread(() -> fetchInitialState(deviceId, pairingToken)).start();
         }
     }
 
-    private void fetchInitialState(String deviceId) {
+    private void fetchInitialState(String deviceId, String pairingToken) {
         try {
-            URL url = new URL("https://api.decenza.coffee/v1/device-state?device_id=" + deviceId);
+            String query = "device_id=" + URLEncoder.encode(deviceId, "UTF-8")
+                    + "&pairing_token=" + URLEncoder.encode(pairingToken, "UTF-8");
+            URL url = new URL("https://api.decenza.coffee/v1/device-state?" + query);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setConnectTimeout(5000);
@@ -46,9 +51,14 @@ public class DecenzaApplication extends QtApplication {
 
             if (conn.getResponseCode() == 200) {
                 InputStream is = conn.getInputStream();
-                byte[] bytes = is.readAllBytes();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = is.read(buf)) != -1) {
+                    baos.write(buf, 0, len);
+                }
                 is.close();
-                JSONObject json = new JSONObject(new String(bytes));
+                JSONObject json = new JSONObject(baos.toString("UTF-8"));
                 boolean isAwake = json.optBoolean("isAwake", false);
                 PowerWidgetProvider.setIsAwake(this, isAwake);
                 PowerWidgetProvider.refreshAllWidgets(this);
