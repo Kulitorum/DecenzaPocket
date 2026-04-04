@@ -145,6 +145,7 @@ if(IOS)
     # Use native AVFoundation backend only (no FFmpeg)
     qt_import_plugins(DecenzaPocket
         INCLUDE_BY_TYPE multimedia Qt6::QDarwinMediaPlugin
+        INCLUDE_BY_TYPE imageformats Qt6::QWebpPlugin
     )
 
     target_link_libraries(DecenzaPocket PRIVATE
