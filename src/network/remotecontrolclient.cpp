@@ -4,6 +4,7 @@
 #include <QBuffer>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QImageReader>
 #include <QDebug>
 
 RemoteControlClient::RemoteControlClient(QWebSocket* socket, QObject* parent)
@@ -14,17 +15,32 @@ RemoteControlClient::RemoteControlClient(QWebSocket* socket, QObject* parent)
 
 void RemoteControlClient::handleBinaryMessage(const QByteArray& data)
 {
-    if (data.isEmpty()) return;
+    if (data.isEmpty()) {
+        qDebug() << "RemoteControl: received empty binary message";
+        return;
+    }
     quint8 type = static_cast<quint8>(data[0]);
+    m_messagesReceived++;
+
+    if (m_messagesReceived <= 3 || m_messagesReceived % 100 == 0) {
+        qDebug() << "RemoteControl: binary msg #" << m_messagesReceived
+                 << "type:" << Qt::hex << type << Qt::dec
+                 << "size:" << data.size() << "bytes";
+    }
 
     if (type == 0x01) {
         processTileMessage(data);
+    } else {
+        qDebug() << "RemoteControl: unknown binary type:" << Qt::hex << type;
     }
 }
 
 void RemoteControlClient::processTileMessage(const QByteArray& data)
 {
-    if (data.size() < 7) return;
+    if (data.size() < 7) {
+        qDebug() << "RemoteControl: tile msg too short:" << data.size();
+        return;
+    }
 
     quint16 w = (static_cast<quint8>(data[1]) << 8) | static_cast<quint8>(data[2]);
     quint16 h = (static_cast<quint8>(data[3]) << 8) | static_cast<quint8>(data[4]);
@@ -36,14 +52,22 @@ void RemoteControlClient::processTileMessage(const QByteArray& data)
         m_frameHeight = h;
         m_frame = QImage(w, h, QImage::Format_RGB32);
         m_frame.fill(Qt::black);
+        qDebug() << "RemoteControl: frame initialized" << w << "x" << h
+                 << "tileSize:" << tileSize;
+
+        // Log supported image formats once
+        qDebug() << "RemoteControl: supported formats:" << QImageReader::supportedImageFormats();
         emit frameSizeChanged();
     }
 
     if (!m_active) {
         m_active = true;
+        qDebug() << "RemoteControl: active = true";
         emit activeChanged();
     }
 
+    int tilesDecoded = 0;
+    int tilesFailed = 0;
     int offset = 7;
     for (int i = 0; i < tileCount && offset + 4 <= data.size(); ++i) {
         quint8 tx = static_cast<quint8>(data[offset]);
@@ -52,17 +76,38 @@ void RemoteControlClient::processTileMessage(const QByteArray& data)
                         | static_cast<quint8>(data[offset + 3]);
         offset += 4;
 
-        if (offset + dataLen > data.size()) break;
+        if (offset + dataLen > data.size()) {
+            qDebug() << "RemoteControl: tile" << i << "truncated, need" << dataLen
+                     << "have" << (data.size() - offset);
+            break;
+        }
 
         QByteArray tileData = data.mid(offset, dataLen);
         offset += dataLen;
 
         QImage tile;
         tile.loadFromData(tileData, "WEBP");
-        if (tile.isNull()) continue;
+        if (tile.isNull()) {
+            // Try without format hint (auto-detect)
+            tile.loadFromData(tileData);
+            if (tile.isNull()) {
+                tilesFailed++;
+                if (tilesFailed <= 3) {
+                    // Log first bytes to identify format
+                    QByteArray header = tileData.left(16).toHex(' ');
+                    qDebug() << "RemoteControl: tile decode FAILED, size:" << dataLen
+                             << "header:" << header;
+                }
+                continue;
+            } else {
+                if (tilesDecoded == 0)
+                    qDebug() << "RemoteControl: tile decoded via auto-detect, not WEBP";
+            }
+        }
 
         // Convert tile to match frame format
         tile = tile.convertToFormat(QImage::Format_RGB32);
+        tilesDecoded++;
 
         int x = tx * tileSize;
         int y = ty * tileSize;
@@ -74,6 +119,15 @@ void RemoteControlClient::processTileMessage(const QByteArray& data)
             int copyWidth = qMin(tile.width(), m_frame.width() - x) * 4;
             memcpy(dst, src, copyWidth);
         }
+    }
+
+    m_tilesTotal += tileCount;
+    m_tilesDecoded += tilesDecoded;
+    m_tilesFailed += tilesFailed;
+
+    if (m_messagesReceived <= 3 || m_messagesReceived % 100 == 0) {
+        qDebug() << "RemoteControl: tiles this msg:" << tilesDecoded << "/" << tileCount
+                 << "total decoded/failed:" << m_tilesDecoded << "/" << m_tilesFailed;
     }
 
     emit frameUpdated();

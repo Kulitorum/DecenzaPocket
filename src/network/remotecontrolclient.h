@@ -41,6 +41,10 @@ private:
     bool m_active = false;
     qreal m_lastSentX = -1;
     qreal m_lastSentY = -1;
+    int m_messagesReceived = 0;
+    int m_tilesTotal = 0;
+    int m_tilesDecoded = 0;
+    int m_tilesFailed = 0;
 };
 
 class RemoteFrameProvider : public QQuickImageProvider {
