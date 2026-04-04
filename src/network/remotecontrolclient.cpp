@@ -2,6 +2,8 @@
 
 #include <QWebSocket>
 #include <QBuffer>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QDebug>
 
 RemoteControlClient::RemoteControlClient(QWebSocket* socket, QObject* parent)
@@ -80,9 +82,29 @@ void RemoteControlClient::processTileMessage(const QByteArray& data)
 void RemoteControlClient::sendTouch(int touchType, qreal normalizedX,
                                      qreal normalizedY, int pointId)
 {
+    // For move events, skip if position barely changed (prevents flooding relay)
+    if (touchType == 1) { // move
+        qreal dx = normalizedX - m_lastSentX;
+        qreal dy = normalizedY - m_lastSentY;
+        if (dx * dx + dy * dy < 0.0001) return; // ~1% movement threshold
+    }
+
+    m_lastSentX = normalizedX;
+    m_lastSentY = normalizedY;
+
+    // Reset tracking on release
+    if (touchType == 2) {
+        m_lastSentX = -1;
+        m_lastSentY = -1;
+    }
+
     quint16 x = static_cast<quint16>(qBound(0.0, normalizedX, 1.0) * 65535);
     quint16 y = static_cast<quint16>(qBound(0.0, normalizedY, 1.0) * 65535);
+    sendTouchBinary(touchType, x, y, pointId);
+}
 
+void RemoteControlClient::sendTouchBinary(int touchType, quint16 x, quint16 y, int pointId)
+{
     QByteArray msg(7, Qt::Uninitialized);
     msg[0] = 0x02;
     msg[1] = static_cast<char>(touchType);
@@ -92,7 +114,11 @@ void RemoteControlClient::sendTouch(int touchType, qreal normalizedX,
     msg[5] = static_cast<char>(y & 0xFF);
     msg[6] = static_cast<char>(pointId);
 
-    m_socket->sendBinaryMessage(msg);
+    QJsonObject envelope;
+    envelope["action"] = QStringLiteral("binary_relay");
+    envelope["data"] = QString::fromLatin1(msg.toBase64());
+    QByteArray jsonMsg = QJsonDocument(envelope).toJson(QJsonDocument::Compact);
+    m_socket->sendTextMessage(QString::fromUtf8(jsonMsg));
 }
 
 // --- Image Provider ---

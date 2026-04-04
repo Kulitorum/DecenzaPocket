@@ -32,12 +32,15 @@ signals:
 
 private:
     void processTileMessage(const QByteArray& data);
+    void sendTouchBinary(int touchType, quint16 x, quint16 y, int pointId);
 
     QWebSocket* m_socket;
     QImage m_frame;
     int m_frameWidth = 0;
     int m_frameHeight = 0;
     bool m_active = false;
+    qreal m_lastSentX = -1;
+    qreal m_lastSentY = -1;
 };
 
 class RemoteFrameProvider : public QQuickImageProvider {

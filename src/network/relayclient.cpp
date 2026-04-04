@@ -176,6 +176,11 @@ void RelayClient::onTextMessageReceived(const QString& message)
     } else if (type == QLatin1String("pong")) {
         // Heartbeat response, nothing to do
 
+    } else if (type == QLatin1String("binary_relay")) {
+        // Decode base64 data and forward as binary
+        QByteArray binaryData = QByteArray::fromBase64(json.value("data").toString().toLatin1());
+        emit binaryMessageReceived(binaryData);
+
     } else {
         qDebug() << "RelayClient: unknown message type:" << type;
     }
