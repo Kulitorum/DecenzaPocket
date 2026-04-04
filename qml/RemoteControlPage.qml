@@ -84,37 +84,6 @@ Rectangle {
         }
     }
 
-    // Debug overlay
-    Text {
-        id: debugText
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 8
-        color: "lime"
-        font.pixelSize: 12
-        wrapMode: Text.Wrap
-        property string fullText: "active: " + RemoteControl.active
-              + " | frames: " + remoteScreen.frameCounter
-              + " | size: " + RemoteControl.frameWidth + "x" + RemoteControl.frameHeight
-              + "\n" + RemoteControl.debugInfo
-        text: fullText
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                // Copy to clipboard
-                clipHelper.text = debugText.fullText
-                clipHelper.selectAll()
-                clipHelper.copy()
-                debugText.color = "yellow"
-                clipTimer.start()
-            }
-        }
-    }
-    TextEdit { id: clipHelper; visible: false }
-    Timer { id: clipTimer; interval: 500; onTriggered: debugText.color = "lime" }
-
     Rectangle {
         anchors.top: parent.top
         anchors.left: parent.left
