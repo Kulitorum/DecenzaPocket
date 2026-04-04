@@ -38,7 +38,16 @@ set(SOURCES
     src/network/connectionmanager.cpp
     src/network/remotecontrolclient.h
     src/network/remotecontrolclient.cpp
+    src/core/nativebridge.h
 )
+
+if(ANDROID)
+    list(APPEND SOURCES src/core/nativebridge_android.cpp)
+elseif(IOS)
+    list(APPEND SOURCES src/core/nativebridge_ios.mm)
+else()
+    list(APPEND SOURCES src/core/nativebridge_stub.cpp)
+endif()
 
 qt_add_executable(DecenzaPocket ${SOURCES})
 

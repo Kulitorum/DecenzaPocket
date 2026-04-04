@@ -45,6 +45,5 @@ signals:
     void themeAutoSyncChanged();
 
 private:
-    void syncToAndroidPrefs(const QString& deviceId, const QString& pairingToken);
     QSettings m_settings;
 };

@@ -6,6 +6,7 @@
 #include <QDebug>
 
 #include "core/settings.h"
+#include "core/nativebridge.h"
 #include "core/notificationmanager.h"
 #include "network/discovery.h"
 #include "network/decenzaclient.h"
@@ -62,6 +63,11 @@ int main(int argc, char *argv[])
 
     if (engine.rootObjects().isEmpty())
         return -1;
+
+    // Sync pairing data to native platform storage for widget access
+    if (settings.isPaired()) {
+        NativeBridge::syncPairingData(settings.pairedDeviceId(), settings.pairingToken());
+    }
 
     return app.exec();
 }
