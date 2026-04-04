@@ -19,20 +19,20 @@ QtObject {
     property color primaryContrastColor: _color("primaryContrastColor", "#ffffff")
 
     // Font sizes
-    property int headingSize: _font("headingSize", 28)
-    property int titleSize: _font("titleSize", 22)
-    property int subtitleSize: _font("subtitleSize", 16)
-    property int bodySize: _font("bodySize", 16)
-    property int labelSize: _font("labelSize", 13)
-    property int valueSize: _font("valueSize", 48)
+    property int headingSize: _font("headingSize", 28) * scale
+    property int titleSize: _font("titleSize", 22) * scale
+    property int subtitleSize: _font("subtitleSize", 16) * scale
+    property int bodySize: _font("bodySize", 16) * scale
+    property int labelSize: _font("labelSize", 13) * scale
+    property int valueSize: _font("valueSize", 48) * scale
 
     // Spacing
-    property int spacingSmall: 8
-    property int spacingMedium: 16
-    property int spacingLarge: 24
+    property int spacingSmall: 8 * scale
+    property int spacingMedium: 16 * scale
+    property int spacingLarge: 24 * scale
 
     // Radius
-    property int cardRadius: 16
+    property int cardRadius: 16 * scale
 
     function _color(name, fallback) {
         var cached = Settings.themeColors[name]

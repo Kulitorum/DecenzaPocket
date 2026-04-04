@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Window
 
 ApplicationWindow {
     id: window
@@ -9,6 +10,12 @@ ApplicationWindow {
     height: 700
     title: "Decenza Pocket"
     color: Theme.backgroundColor
+
+    Component.onCompleted: {
+        // Scale UI relative to a 700pt reference height
+        var h = Screen.height / Screen.devicePixelRatio
+        Theme.scale = Math.min(h / 700, 1.2)
+    }
 
     StackView {
         id: stackView
@@ -36,7 +43,7 @@ ApplicationWindow {
             ColumnLayout {
                 visible: !parent.landscape
                 anchors.fill: parent
-                anchors.bottomMargin: 56
+                anchors.bottomMargin: 56 * Theme.scale
                 anchors.topMargin: Theme.spacingMedium
                 anchors.leftMargin: Theme.spacingMedium
                 anchors.rightMargin: Theme.spacingMedium
@@ -53,7 +60,7 @@ ApplicationWindow {
 
                 StatusCard {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 200
+                    Layout.preferredHeight: 200 * Theme.scale
                     connected: Connection.mode !== "disconnected"
                     machineState: Connection.machineState
                     machinePhase: Connection.machinePhase
@@ -67,7 +74,7 @@ ApplicationWindow {
 
                 Button {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 48
+                    Layout.preferredHeight: 48 * Theme.scale
                     enabled: Connection.mode !== "disconnected"
                     onClicked: {
                         Connection.sendCommand("start_remote")
@@ -91,7 +98,7 @@ ApplicationWindow {
 
                 PowerButton {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 64
+                    Layout.preferredHeight: 64 * Theme.scale
                     isAwake: Connection.isAwake
                     connected: Connection.mode !== "disconnected"
                     onToggled: {
@@ -112,7 +119,7 @@ ApplicationWindow {
             RowLayout {
                 visible: parent.landscape
                 anchors.fill: parent
-                anchors.bottomMargin: 56
+                anchors.bottomMargin: 56 * Theme.scale
                 anchors.topMargin: Theme.spacingMedium
                 anchors.leftMargin: Theme.spacingMedium
                 anchors.rightMargin: Theme.spacingMedium
@@ -160,7 +167,7 @@ ApplicationWindow {
 
                     Button {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 48
+                        Layout.preferredHeight: 48 * Theme.scale
                         enabled: Connection.mode !== "disconnected"
                         onClicked: {
                             Connection.sendCommand("start_remote")
@@ -184,7 +191,7 @@ ApplicationWindow {
 
                     PowerButton {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 64
+                        Layout.preferredHeight: 64 * Theme.scale
                         isAwake: Connection.isAwake
                         connected: Connection.mode !== "disconnected"
                         onToggled: {
