@@ -33,6 +33,7 @@ Makefile
 
 # Secrets
 Secrets/
+android/google-services.json
 
 # OS
 .DS_Store
