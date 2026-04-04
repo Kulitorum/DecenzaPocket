@@ -84,6 +84,22 @@ Rectangle {
         }
     }
 
+    // Debug overlay
+    Text {
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.margins: 8
+        color: "lime"
+        font.pixelSize: 12
+        wrapMode: Text.Wrap
+        text: "active: " + RemoteControl.active
+              + "\nframes: " + remoteScreen.frameCounter
+              + "\nframeSize: " + RemoteControl.frameWidth + "x" + RemoteControl.frameHeight
+              + "\nimgSize: " + remoteScreen.width.toFixed(0) + "x" + remoteScreen.height.toFixed(0)
+              + "\nsource: " + remoteScreen.source
+    }
+
     Rectangle {
         anchors.top: parent.top
         anchors.left: parent.left
