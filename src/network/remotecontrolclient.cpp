@@ -13,6 +13,16 @@ RemoteControlClient::RemoteControlClient(QWebSocket* socket, QObject* parent)
 {
 }
 
+QString RemoteControlClient::debugInfo() const
+{
+    return QStringLiteral("msgs: %1 | tiles ok/fail: %2/%3\nformats: %4\n%5")
+        .arg(m_messagesReceived)
+        .arg(m_tilesDecoded)
+        .arg(m_tilesFailed)
+        .arg(m_supportedFormats.isEmpty() ? "not yet loaded" : m_supportedFormats)
+        .arg(m_lastTileError);
+}
+
 void RemoteControlClient::handleBinaryMessage(const QByteArray& data)
 {
     if (data.isEmpty()) {
@@ -56,7 +66,11 @@ void RemoteControlClient::processTileMessage(const QByteArray& data)
                  << "tileSize:" << tileSize;
 
         // Log supported image formats once
-        qDebug() << "RemoteControl: supported formats:" << QImageReader::supportedImageFormats();
+        auto fmts = QImageReader::supportedImageFormats();
+        QStringList fmtList;
+        for (const auto& f : fmts) fmtList << QString::fromLatin1(f);
+        m_supportedFormats = fmtList.join(", ");
+        qDebug() << "RemoteControl: supported formats:" << m_supportedFormats;
         emit frameSizeChanged();
     }
 
@@ -93,8 +107,10 @@ void RemoteControlClient::processTileMessage(const QByteArray& data)
             if (tile.isNull()) {
                 tilesFailed++;
                 if (tilesFailed <= 3) {
-                    // Log first bytes to identify format
                     QByteArray header = tileData.left(16).toHex(' ');
+                    m_lastTileError = QStringLiteral("FAIL sz:%1 hdr:%2")
+                        .arg(dataLen)
+                        .arg(QString::fromLatin1(header));
                     qDebug() << "RemoteControl: tile decode FAILED, size:" << dataLen
                              << "header:" << header;
                 }

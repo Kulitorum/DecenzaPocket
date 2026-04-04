@@ -86,6 +86,7 @@ Rectangle {
 
     // Debug overlay
     Text {
+        id: debugText
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -93,12 +94,26 @@ Rectangle {
         color: "lime"
         font.pixelSize: 12
         wrapMode: Text.Wrap
-        text: "active: " + RemoteControl.active
-              + "\nframes: " + remoteScreen.frameCounter
-              + "\nframeSize: " + RemoteControl.frameWidth + "x" + RemoteControl.frameHeight
-              + "\nimgSize: " + remoteScreen.width.toFixed(0) + "x" + remoteScreen.height.toFixed(0)
-              + "\nsource: " + remoteScreen.source
+        property string fullText: "active: " + RemoteControl.active
+              + " | frames: " + remoteScreen.frameCounter
+              + " | size: " + RemoteControl.frameWidth + "x" + RemoteControl.frameHeight
+              + "\n" + RemoteControl.debugInfo
+        text: fullText
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                // Copy to clipboard
+                clipHelper.text = debugText.fullText
+                clipHelper.selectAll()
+                clipHelper.copy()
+                debugText.color = "yellow"
+                clipTimer.start()
+            }
+        }
     }
+    TextEdit { id: clipHelper; visible: false }
+    Timer { id: clipTimer; interval: 500; onTriggered: debugText.color = "lime" }
 
     Rectangle {
         anchors.top: parent.top

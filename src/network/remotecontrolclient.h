@@ -11,6 +11,7 @@ class RemoteControlClient : public QObject {
     Q_PROPERTY(bool active READ isActive NOTIFY activeChanged)
     Q_PROPERTY(int frameWidth READ frameWidth NOTIFY frameSizeChanged)
     Q_PROPERTY(int frameHeight READ frameHeight NOTIFY frameSizeChanged)
+    Q_PROPERTY(QString debugInfo READ debugInfo NOTIFY frameUpdated)
 
 public:
     explicit RemoteControlClient(QWebSocket* socket, QObject* parent = nullptr);
@@ -18,6 +19,8 @@ public:
     bool isActive() const { return m_active; }
     int frameWidth() const { return m_frameWidth; }
     int frameHeight() const { return m_frameHeight; }
+
+    QString debugInfo() const;
 
     Q_INVOKABLE void sendTouch(int touchType, qreal normalizedX,
                                 qreal normalizedY, int pointId = 0);
@@ -45,6 +48,8 @@ private:
     int m_tilesTotal = 0;
     int m_tilesDecoded = 0;
     int m_tilesFailed = 0;
+    QString m_supportedFormats;
+    QString m_lastTileError;
 };
 
 class RemoteFrameProvider : public QQuickImageProvider {
