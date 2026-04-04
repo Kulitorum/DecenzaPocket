@@ -76,21 +76,24 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Install Apple certificate and provisioning profile
+      - name: Install Apple certificate and provisioning profiles
         env:
           P12_CERTIFICATE_BASE64: ${{ secrets.P12_CERTIFICATE_BASE64 }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
           PROVISIONING_PROFILE_BASE64: ${{ secrets.PROVISIONING_PROFILE_BASE64 }}
+          WIDGET_PROVISIONING_PROFILE_BASE64: ${{ secrets.WIDGET_PROVISIONING_PROFILE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
           # Create variables
           CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
           PROFILE_PATH=$RUNNER_TEMP/build_profile.mobileprovision
+          WIDGET_PROFILE_PATH=$RUNNER_TEMP/widget_profile.mobileprovision
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
           # Decode from base64
           echo -n "$P12_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
           echo -n "$PROVISIONING_PROFILE_BASE64" | base64 --decode -o $PROFILE_PATH
+          echo -n "$WIDGET_PROVISIONING_PROFILE_BASE64" | base64 --decode -o $WIDGET_PROFILE_PATH
 
           # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
@@ -102,12 +105,17 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-          # Install provisioning profile (must use UUID as filename)
+          # Install provisioning profiles (must use UUID as filename)
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+
           PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(/usr/bin/security cms -D -i $PROFILE_PATH))
           cp $PROFILE_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$PROFILE_UUID.mobileprovision
-          echo "Installed profile with UUID: $PROFILE_UUID"
+          echo "Installed main app profile with UUID: $PROFILE_UUID"
           echo "PROFILE_UUID=$PROFILE_UUID" >> $GITHUB_ENV
+
+          WIDGET_PROFILE_UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(/usr/bin/security cms -D -i $WIDGET_PROFILE_PATH))
+          cp $WIDGET_PROFILE_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$WIDGET_PROFILE_UUID.mobileprovision
+          echo "Installed widget profile with UUID: $WIDGET_PROFILE_UUID"
 
       - name: Configure CMake
         run: |
