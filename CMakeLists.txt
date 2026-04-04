@@ -129,6 +129,10 @@ if(IOS)
         XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${CURRENT_VERSION_CODE}"
     )
 
+    set_target_properties(DecenzaPocket PROPERTIES
+        XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS "${CMAKE_CURRENT_SOURCE_DIR}/ios/DecenzaPocket.entitlements"
+    )
+
     # Add iOS asset catalog for app icon
     target_sources(DecenzaPocket PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/ios/Assets.xcassets"
