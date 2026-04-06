@@ -96,14 +96,12 @@ Close WebSocket
 - OFF: `icon/DecenzaPocketIcon_OFF.png` (red power button)
 - Need density-scaled versions for widget drawables (mdpi through xxxhdpi)
 
+## Status
+
+Implemented and shipped in v0.3.0. iOS widget also implemented (see `2026-04-04-ios-widget-design.md`).
+
 ## Out of scope
 
-- iOS widget (future work — WidgetKit + APNs, similar pattern)
 - Local network discovery from widget
 - Showing temperature or other status in widget
 - Multiple machine support (single paired device)
-
-## Open items
-
-- User must create Firebase project and provide `google-services.json`
-- FCM server key or service account credentials needed in Lambda environment

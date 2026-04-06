@@ -69,6 +69,10 @@ No changes needed. The existing FCM module, DynamoDB tables, and relay logic sup
 | Build integration | Gradle dependencies | Separate Xcode project, embedded .appex |
 | Push entitlement | Automatic with FCM | Requires APNs key + entitlement |
 
+## Status
+
+Implemented and shipped in v0.3.0. Also required adding `qtimageformats` module to CI for WEBP/SVG support on iOS static builds, and a NativeBridge abstraction that replaced the Android-only `syncToAndroidPrefs` with cross-platform `NativeBridge::syncPairingData`.
+
 ## Out of scope
 
 - Lock Screen controls (iOS 18 Control Center widgets — future work)
