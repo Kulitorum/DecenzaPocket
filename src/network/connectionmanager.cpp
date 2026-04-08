@@ -3,6 +3,7 @@
 #include "core/settings.h"
 
 #include <QDebug>
+#include <QTimer>
 
 
 ConnectionManager::ConnectionManager(Settings* settings, RelayClient* remoteClient,
@@ -36,6 +37,11 @@ void ConnectionManager::wake()
 {
     if (m_remoteClient->isConnected()) {
         m_remoteClient->sendCommand(QStringLiteral("wake"));
+        // BLE state change is async — request fresh status after it settles
+        QTimer::singleShot(3000, this, [this]() {
+            if (m_remoteClient->isConnected())
+                m_remoteClient->sendCommand(QStringLiteral("status"));
+        });
     } else {
         qWarning() << "ConnectionManager: wake() called but no connection available";
     }
@@ -45,6 +51,10 @@ void ConnectionManager::sleep()
 {
     if (m_remoteClient->isConnected()) {
         m_remoteClient->sendCommand(QStringLiteral("sleep"));
+        QTimer::singleShot(3000, this, [this]() {
+            if (m_remoteClient->isConnected())
+                m_remoteClient->sendCommand(QStringLiteral("status"));
+        });
     } else {
         qWarning() << "ConnectionManager: sleep() called but no connection available";
     }
@@ -90,6 +100,9 @@ void ConnectionManager::onRemoteConnectedChanged()
              << m_remoteClient->isConnected();
     if (m_remoteClient->isConnected()) {
         setMode(QStringLiteral("remote"));
+        // Request current status from the machine — the tablet only pushes
+        // status when it changes, so we may have missed the initial push.
+        m_remoteClient->sendCommand(QStringLiteral("status"));
     } else {
         setMode(QStringLiteral("disconnected"));
     }

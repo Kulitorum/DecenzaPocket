@@ -161,9 +161,31 @@ void RelayClient::onTextMessageReceived(const QString& message)
         m_previousPhase = phase;
 
     } else if (type == QLatin1String("relay_response")) {
-        QString commandId = json.value("commandId").toString();
+        QString commandId = json.value("command_id").toString();
         bool success = json.value("success").toBool();
         emit commandResult(commandId, success);
+
+        // Extract inline status from the command response data
+        QJsonObject data = json.value("data").toObject();
+        if (data.contains(QLatin1String("state"))) {
+            QString rState = data.value("state").toString();
+            QString rPhase = data.value("phase").toString();
+            double rTemp = data.value("temperature").toDouble();
+            double rGoal = data.value("goalTemperature").toDouble();
+            double rWater = data.value("waterLevelMl").toDouble();
+            bool rHeat = data.value("isHeating").toBool();
+            bool rReady = data.value("isReady").toBool();
+            bool rAwake = data.value("isAwake").toBool();
+
+            if (rGoal > 0 && rTemp > 0 &&
+                (rPhase == "Ready" || rPhase == "Idle") &&
+                rTemp < rGoal - 0.5) {
+                rPhase = QStringLiteral("Heating");
+            }
+
+            emit statusReceived(rState, rPhase, rTemp, rWater,
+                                rHeat, rReady, rAwake);
+        }
 
     } else if (type == QLatin1String("registered")) {
         qDebug() << "RelayClient: registered successfully";

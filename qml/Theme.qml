@@ -2,8 +2,6 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    property real scale: 1.0
-
     // Colors - from cached theme or Decenza defaults
     property color backgroundColor: _color("backgroundColor", "#1a1a2e")
     property color surfaceColor: _color("surfaceColor", "#303048")
@@ -19,20 +17,20 @@ QtObject {
     property color primaryContrastColor: _color("primaryContrastColor", "#ffffff")
 
     // Font sizes
-    property int headingSize: _font("headingSize", 28) * scale
-    property int titleSize: _font("titleSize", 22) * scale
-    property int subtitleSize: _font("subtitleSize", 16) * scale
-    property int bodySize: _font("bodySize", 16) * scale
-    property int labelSize: _font("labelSize", 13) * scale
-    property int valueSize: _font("valueSize", 48) * scale
+    property int headingSize: _font("headingSize", 28)
+    property int titleSize: _font("titleSize", 22)
+    property int subtitleSize: _font("subtitleSize", 16)
+    property int bodySize: _font("bodySize", 16)
+    property int labelSize: _font("labelSize", 13)
+    property int valueSize: _font("valueSize", 48)
 
     // Spacing
-    property int spacingSmall: 8 * scale
-    property int spacingMedium: 16 * scale
-    property int spacingLarge: 24 * scale
+    property int spacingSmall: 8
+    property int spacingMedium: 16
+    property int spacingLarge: 24
 
     // Radius
-    property int cardRadius: 16 * scale
+    property int cardRadius: 16
 
     function _color(name, fallback) {
         var cached = Settings.themeColors[name]

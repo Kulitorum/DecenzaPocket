@@ -14,7 +14,7 @@ Rectangle {
     anchors.left: parent.left
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    height: 56 * Theme.scale
+    height: 56
     color: Theme.primaryColor
 
     // Top border
