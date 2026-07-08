@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(DecenzaPocket VERSION 1.0.0 LANGUAGES CXX)
+project(DecenzaPocket VERSION 1.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -139,6 +139,14 @@ if(IOS)
     )
     set_source_files_properties(
         "${CMAKE_CURRENT_SOURCE_DIR}/ios/Assets.xcassets"
+        PROPERTIES MACOSX_PACKAGE_LOCATION Resources
+    )
+    # Add privacy manifest (required for App Store since spring 2024)
+    target_sources(DecenzaPocket PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/ios/PrivacyInfo.xcprivacy"
+    )
+    set_source_files_properties(
+        "${CMAKE_CURRENT_SOURCE_DIR}/ios/PrivacyInfo.xcprivacy"
         PROPERTIES MACOSX_PACKAGE_LOCATION Resources
     )
 

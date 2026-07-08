@@ -35,6 +35,15 @@ Makefile
 Secrets/
 android/google-services.json
 ios/GoogleService-Info.plist
+# App Store signing — never commit these to the public repo
+*.p8
+*.mobileprovision
+
+# App Store submission working files (screenshots, exported keys)
+Appstoreconnect/
+
+# Claude Code local files
+.claude/
 
 # OS
 .DS_Store

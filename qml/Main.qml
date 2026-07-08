@@ -5,8 +5,8 @@ import QtQuick.Layouts
 ApplicationWindow {
     id: window
     visible: true
-    width: 400
-    height: 700
+    width: 800
+    height: 400
     title: "Decenza Pocket"
     color: Theme.backgroundColor
 
@@ -14,6 +14,20 @@ ApplicationWindow {
         id: stackView
         anchors.fill: parent
         initialItem: Settings.isPaired ? statusView : pairingView
+    }
+
+    // Drop the relay connection while backgrounded so the tablet stops
+    // streaming screen tiles (and we stop burning battery decoding them).
+    Connections {
+        target: Qt.application
+        function onStateChanged() {
+            if (Qt.application.state === Qt.ApplicationActive) {
+                if (Settings.isPaired) Connection.start()
+            } else {
+                Connection.sendCommand("stop_remote")
+                Connection.disconnect()
+            }
+        }
     }
 
     Component {
@@ -35,8 +49,11 @@ ApplicationWindow {
             // Portrait layout
             ColumnLayout {
                 visible: !parent.landscape
-                anchors.fill: parent
-                anchors.bottomMargin: 56
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: statusBottomBar.top
+                anchors.bottomMargin: Theme.spacingMedium
                 anchors.topMargin: Theme.spacingMedium
                 anchors.leftMargin: Theme.spacingMedium
                 anchors.rightMargin: Theme.spacingMedium
@@ -111,8 +128,11 @@ ApplicationWindow {
             // Landscape layout — two columns
             RowLayout {
                 visible: parent.landscape
-                anchors.fill: parent
-                anchors.bottomMargin: 56
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: statusBottomBar.top
+                anchors.bottomMargin: Theme.spacingMedium
                 anchors.topMargin: Theme.spacingMedium
                 anchors.leftMargin: Theme.spacingMedium
                 anchors.rightMargin: Theme.spacingMedium
@@ -200,6 +220,7 @@ ApplicationWindow {
             }
 
             BottomBar {
+                id: statusBottomBar
                 title: "Decenza Pocket"
                 iconSource: "qrc:/resources/icons/settings.svg"
                 onClicked: stackView.push(settingsView)
@@ -218,7 +239,9 @@ ApplicationWindow {
         RemoteControlPage {
             onBack: {
                 Connection.sendCommand("stop_remote")
+                Connection.disconnect()
                 stackView.pop()
+                if (Settings.isPaired) Connection.start()
             }
         }
     }
