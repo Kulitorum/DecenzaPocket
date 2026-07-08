@@ -14,11 +14,12 @@ DecenzaPocket connects to a running Decenza instance over the network, giving yo
 
 ## Features
 
-- **Auto-discovery** of Decenza instances on the local network
-- **Remote access** via AWS WebSocket relay when away from home
-- **Start/stop shots** and monitor machine state
-- **Real-time status** — pressure, temperature, flow, and shot progress
-- **Power control** — wake and sleep your DE1 remotely
+- **Auto-discovery** of Decenza instances on the local network, plus remote access via AWS WebSocket relay when away from home
+- **Power control** — wake and sleep your DE1 from anywhere
+- **Live status** — temperature, water level, and heating/ready state
+- **Ready notification** — a sound + push alert the moment the machine is up to temperature
+- **Remote Control** — mirror and drive the Decenza tablet screen from your phone
+- **Home-screen widget** — one-tap power toggle (Android & iOS)
 
 ## Download
 
