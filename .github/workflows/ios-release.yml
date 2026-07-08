@@ -33,6 +33,18 @@ jobs:
         with:
           fetch-depth: 0  # Full history for version tags
 
+      - name: Select latest Xcode
+        # App Store Connect rejects uploads not built with the current SDK
+        # (iOS 26 / Xcode 26+). The runner defaults to an older Xcode, so pin it.
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Show Xcode / SDK versions
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
       - name: Bump version code
         id: bump
         run: |
