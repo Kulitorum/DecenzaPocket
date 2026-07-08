@@ -127,6 +127,11 @@ int main(int argc, char *argv[])
                     if (e->type() != QEvent::KeyPress)
                         return false;
                     switch (static_cast<QKeyEvent *>(e)->key()) {
+                    case Qt::Key_F4:  // 13" iPad landscape — needs @2 (iPad renders at 2x, not 3x)
+                        if (m_scale != 2)
+                            qWarning().noquote() << "iPad size needs @2 — relaunch with --ss 2752x2064@2";
+                        lockTo(2752, 2064);
+                        return true;
                     case Qt::Key_F5:  lockTo(2868, 1320); return true; // 6.9" landscape
                     case Qt::Key_F6:  lockTo(2688, 1242); return true; // 6.5" landscape
                     case Qt::Key_F7:  lockTo(1320, 2868); return true; // 6.9" portrait
@@ -159,6 +164,7 @@ int main(int argc, char *argv[])
             helper->lockTo(screenshotLogical.width() * screenshotScale, screenshotLogical.height() * screenshotScale);
 
             qInfo().noquote() << "Screenshot mode — snap to a device size, then capture:\n"
+                                 "  F4 = 2752x2064 (13\" iPad landscape — launch this session with @2)\n"
                                  "  F5 = 2868x1320 (6.9\" landscape)   F6 = 2688x1242 (6.5\" landscape)\n"
                                  "  F7 = 1320x2868 (6.9\" portrait)    F8 = 1242x2688 (6.5\" portrait)\n"
                                  "  F12 = save PNG at the current size";
