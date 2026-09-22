@@ -39,7 +39,10 @@ void syncPairingData(const QString& deviceId, const QString& pairingToken)
         QJniObject::fromString("device/pairingToken").object<jstring>(),
         QJniObject::fromString(pairingToken).object<jstring>());
 
-    editor.callObjectMethod("apply", "()V");
+    // apply() returns void. Calling it through callObjectMethod() uses the
+    // wrong JNI dispatch function and can leave the widget without the copied
+    // pairing credentials even though QSettings in the main app is populated.
+    editor.callMethod<void>("apply");
     qDebug() << "NativeBridge: synced pairing to Android SharedPreferences";
 #else
     Q_UNUSED(deviceId);

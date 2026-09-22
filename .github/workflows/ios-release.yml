@@ -196,6 +196,22 @@ jobs:
             MARKETING_VERSION="${{ env.APP_VERSION }}" \
             CURRENT_PROJECT_VERSION="${{ steps.bump.outputs.build_code }}"
 
+      - name: Verify Widget App Group entitlement
+        run: |
+          WIDGET_APPEX=$(find $RUNNER_TEMP/widget-build -name "PowerWidgetExtension.appex" -type d | head -1)
+          if [ -z "$WIDGET_APPEX" ]; then
+            echo "::error::Widget extension was not produced"
+            exit 1
+          fi
+
+          ENTITLEMENTS=$RUNNER_TEMP/widget-entitlements.plist
+          codesign -d --entitlements :- "$WIDGET_APPEX" > "$ENTITLEMENTS"
+          if ! /usr/libexec/PlistBuddy -c "Print :com.apple.security.application-groups" "$ENTITLEMENTS" \
+              | grep -Fq "group.io.github.kulitorum.decenzapocket"; then
+            echo "::error::The signed widget is missing the shared App Group entitlement. Enable group.io.github.kulitorum.decenzapocket for the widget App ID, regenerate its provisioning profile, and update WIDGET_PROVISIONING_PROFILE_BASE64."
+            exit 1
+          fi
+
       - name: Build and Archive
         env:
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}

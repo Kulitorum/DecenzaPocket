@@ -25,3 +25,6 @@ targets:
         CURRENT_PROJECT_VERSION: "$(CURRENT_PROJECT_VERSION)"
     entitlements:
       path: PowerWidgetExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.io.github.kulitorum.decenzapocket
